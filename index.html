@@ -1,1763 +1,2656 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#100c15">
 
-    <meta charset="UTF-8">
+  <title>CriAItor 3D | Administração</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+  <link
+    rel="icon"
+    type="image/jpeg"
+    href="./src/assets/logo-criaitor3d.jpg"
+  >
 
-    <meta
-        name="theme-color"
-        content="#100c15"
-    >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
 
-    <meta
-        name="description"
-        content="Painel administrativo da CriAItor 3D."
-    >
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
 
-    <title>
-        CriAItor 3D | Administração
-    </title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
 
-    <!-- LOGO -->
+  <link
+    rel="stylesheet"
+    href="./src/style.css?v=20261005-prec2"
+  >
 
-    <link
-        rel="icon"
-        type="image/jpeg"
-        href="./src/assets/logo-criaitor3d.jpg"
-    >
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    defer
+  ></script>
 
-    <!-- FONTES -->
+  <script
+    src="./src/supabase-config.js?v=20261005-prec2"
+    defer
+  ></script>
 
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
+  <script
+    src="./src/catalogo.js?v=20261005-prec2"
+    defer
+  ></script>
 
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
+  <script
+    src="./src/admin-sem-login.js?v=20261005-prec2"
+    defer
+  ></script>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
-        rel="stylesheet"
-    >
+  <script
+    src="./src/fotos-empresa.js?v=20261005-prec2"
+    defer
+  ></script>
 
-    <!-- CSS -->
-
-    <link
-        rel="stylesheet"
-        href="./src/style.css?v=20260928-2"
-    >
-
-    <!-- SEGURANÇA VISUAL -->
-
-    <style>
-
-        html,
-        body {
-            margin: 0;
-            min-height: 100%;
-            background: #100c15;
-            color: #ffffff;
-        }
-
-        [hidden] {
-            display: none !important;
-        }
-
-    </style>
-
-    <!-- SUPABASE -->
-
-    <script
-        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-        defer
-    ></script>
-
-    <!-- CONFIGURAÇÃO -->
-
-    <script
-        src="./src/supabase-config.js?v=20260928-2"
-        defer
-    ></script>
-
-    <!-- CATÁLOGO -->
-
-    <script
-        src="./src/catalogo.js?v=20260928-2"
-        defer
-    ></script>
-
-    <!-- ADMINISTRAÇÃO SEM LOGIN -->
-
-    <script
-        src="./src/admin-sem-login.js?v=20260928-2"
-        defer
-    ></script>
-
-    <!-- FOTOS -->
-
-    <script
-        src="./src/fotos-empresa.js?v=20260928-2"
-        defer
-    ></script>
-
-    <!-- SINCRONIZAÇÃO -->
-
-    <script
-        src="./src/sync-empresa.js?v=20260928-2"
-        defer
-    ></script>
-
+  <script
+    src="./src/sync-empresa.js?v=20261005-prec2"
+    defer
+  ></script>
 </head>
 
 <body data-area="empresa">
 
-    <!--
-        NÃO EXISTE TELA DE LOGIN.
-        O painel abre diretamente.
-    -->
+<div class="app" id="app">
 
-    <div
-        class="app"
-        id="app"
-    >
+  <aside class="sidebar">
 
-        <!-- MENU -->
+    <div class="marca">
 
-        <aside class="sidebar">
-
-            <div class="marca">
-
-                <img
-                    src="./src/assets/logo-criaitor3d.jpg"
-                    alt="CriAItor 3D"
-                    class="logo-empresa"
-                    draggable="false"
-                >
-
-            </div>
-
-            <p class="menu-titulo">
-                MENU PRINCIPAL
-            </p>
-
-            <nav
-                class="menu"
-                aria-label="Menu administrativo"
-            >
-
-                <button
-                    type="button"
-                    class="menu-item ativo"
-                    data-pagina="dashboard"
-                >
-                    ◈ Visão geral
-                </button>
-
-                <button
-                    type="button"
-                    class="menu-item"
-                    data-pagina="produtos"
-                >
-                    ▦ Produtos
-                </button>
-
-                <button
-                    type="button"
-                    class="menu-item"
-                    data-pagina="pedidos"
-                >
-                    ▤ Pedidos
-                </button>
-
-                <button
-                    type="button"
-                    class="menu-item"
-                    data-pagina="custos"
-                >
-                    ◫ Custos
-                </button>
-
-                <button
-                    type="button"
-                    class="menu-item"
-                    data-pagina="filamentos"
-                >
-                    ◉ Filamentos
-                </button>
-
-                <button
-                    type="button"
-                    class="menu-item"
-                    data-pagina="publicar"
-                >
-                    ↥ Sincronização
-                </button>
-
-            </nav>
-
-            <div class="sidebar-rodape">
-
-                <strong>
-                    ● CriAItor 3D
-                </strong>
-
-                <p>
-                    Gestão de produção e catálogo.
-                </p>
-
-            </div>
-
-        </aside>
-
-
-        <!-- CONTEÚDO -->
-
-        <div class="conteudo">
-
-            <header class="topbar">
-
-                <div>
-
-                    <small>
-                        CRIAITOR 3D / ADMINISTRAÇÃO
-                    </small>
-
-                    <h2 id="titulo-pagina">
-                        Visão geral
-                    </h2>
-
-                </div>
-
-                <button
-                    type="button"
-                    class="botao botao-laranja"
-                    id="novo-produto-topo"
-                >
-                    + Novo produto
-                </button>
-
-            </header>
-
-
-            <main>
-
-                <div class="aviso">
-
-                    Produtos e fotografias são sincronizados
-                    com a loja dos clientes pelo Supabase.
-
-                </div>
-
-
-                <!-- DASHBOARD -->
-
-                <section
-                    class="pagina ativa"
-                    id="dashboard"
-                >
-
-                    <div class="cabecalho-pagina">
-
-                        <div>
-
-                            <span class="subtitulo">
-                                PAINEL CRIAITOR 3D
-                            </span>
-
-                            <h1>
-                                Bem-vindo ao
-                                <em>atelier.</em>
-                            </h1>
-
-                            <p>
-                                Produtos, pedidos, custos
-                                e matéria-prima em um único painel.
-                            </p>
-
-                        </div>
-
-                        <span
-                            class="data-atual"
-                            id="data-atual"
-                        ></span>
-
-                    </div>
-
-
-                    <div class="indicadores">
-
-                        <div class="indicador">
-
-                            <span>
-                                PRODUTOS
-                            </span>
-
-                            <strong id="total-produtos">
-                                0
-                            </strong>
-
-                            <small>
-                                Produtos cadastrados
-                            </small>
-
-                        </div>
-
-                        <div class="indicador">
-
-                            <span>
-                                VISÍVEIS
-                            </span>
-
-                            <strong id="total-visiveis">
-                                0
-                            </strong>
-
-                            <small>
-                                Produtos na loja
-                            </small>
-
-                        </div>
-
-                        <div class="indicador">
-
-                            <span>
-                                ESTOQUE
-                            </span>
-
-                            <strong id="total-estoque">
-                                0
-                            </strong>
-
-                            <small>
-                                Unidades cadastradas
-                            </small>
-
-                        </div>
-
-                        <div class="indicador">
-
-                            <span>
-                                PEDIDOS ABERTOS
-                            </span>
-
-                            <strong id="total-pedidos">
-                                0
-                            </strong>
-
-                            <small>
-                                Pedidos em andamento
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="painel">
-
-                        <div class="painel-cabecalho">
-
-                            <h2>
-                                Produtos recentes
-                            </h2>
-
-                            <button
-                                type="button"
-                                class="botao-link"
-                                data-ir="produtos"
-                            >
-                                Ver todos →
-                            </button>
-
-                        </div>
-
-                        <div id="produtos-recentes">
-                            Carregando...
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- PRODUTOS -->
-
-                <section
-                    class="pagina"
-                    id="produtos"
-                    hidden
-                >
-
-                    <div class="cabecalho-pagina">
-
-                        <div>
-
-                            <span class="subtitulo">
-                                CATÁLOGO
-                            </span>
-
-                            <h1>
-                                Gerenciar
-                                <em>produtos.</em>
-                            </h1>
-
-                            <p>
-                                Cadastre produtos, preços,
-                                estoque, fotos e descrições.
-                            </p>
-
-                        </div>
-
-                        <button
-                            type="button"
-                            class="botao botao-laranja"
-                            id="novo-produto"
-                        >
-                            + Adicionar produto
-                        </button>
-
-                    </div>
-
-
-                    <div class="painel">
-
-                        <div class="barra-ferramentas">
-
-                            <input
-                                type="search"
-                                id="buscar-produto"
-                                placeholder="Buscar produto..."
-                            >
-
-                            <span id="contador-produtos">
-                                0 produtos
-                            </span>
-
-                        </div>
-
-                        <div class="tabela-container">
-
-                            <table>
-
-                                <thead>
-
-                                    <tr>
-                                        <th>PRODUTO</th>
-                                        <th>CATEGORIA</th>
-                                        <th>PREÇO</th>
-                                        <th>ESTOQUE</th>
-                                        <th>VISIBILIDADE</th>
-                                        <th>AÇÕES</th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody
-                                    id="tabela-produtos"
-                                ></tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- PEDIDOS -->
-
-                <section
-                    class="pagina"
-                    id="pedidos"
-                    hidden
-                >
-
-                    <div class="cabecalho-pagina">
-
-                        <div>
-
-                            <span class="subtitulo">
-                                VENDAS
-                            </span>
-
-                            <h1>
-                                Controle de
-                                <em>pedidos.</em>
-                            </h1>
-
-                        </div>
-
-                        <div class="grupo-botoes">
-
-                            <button
-                                type="button"
-                                class="botao botao-secundario"
-                                id="exportar-pedidos"
-                            >
-                                Exportar CSV
-                            </button>
-
-                            <button
-                                type="button"
-                                class="botao botao-laranja"
-                                id="novo-pedido"
-                            >
-                                + Registrar pedido
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="painel">
-
-                        <div class="tabela-container">
-
-                            <table>
-
-                                <thead>
-
-                                    <tr>
-                                        <th>CLIENTE</th>
-                                        <th>PRODUTOS</th>
-                                        <th>VALOR</th>
-                                        <th>STATUS</th>
-                                        <th>DATA</th>
-                                        <th>AÇÕES</th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody
-                                    id="tabela-pedidos"
-                                ></tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- CUSTOS -->
-
-                <section
-                    class="pagina"
-                    id="custos"
-                    hidden
-                >
-
-                    <div class="cabecalho-pagina">
-
-                        <div>
-
-                            <span class="subtitulo">
-                                GESTÃO FINANCEIRA
-                            </span>
-
-                            <h1>
-                                Controle de
-                                <em>custos.</em>
-                            </h1>
-
-                            <p>
-                                Registre despesas e calcule
-                                o custo das impressões.
-                            </p>
-
-                        </div>
-
-                        <div class="grupo-botoes">
-
-                            <button
-                                type="button"
-                                class="botao botao-secundario"
-                                id="exportar-custos"
-                            >
-                                Exportar CSV
-                            </button>
-
-                            <button
-                                type="button"
-                                class="botao botao-laranja"
-                                id="novo-custo"
-                            >
-                                + Adicionar custo
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="gestao-resumos">
-
-                        <div class="gestao-card">
-
-                            <span>
-                                CUSTOS NO MÊS
-                            </span>
-
-                            <strong id="custos-mes">
-                                R$ 0,00
-                            </strong>
-
-                        </div>
-
-                        <div class="gestao-card">
-
-                            <span>
-                                FIXOS
-                            </span>
-
-                            <strong id="custos-fixos">
-                                R$ 0,00
-                            </strong>
-
-                        </div>
-
-                        <div class="gestao-card">
-
-                            <span>
-                                VARIÁVEIS
-                            </span>
-
-                            <strong id="custos-variaveis">
-                                R$ 0,00
-                            </strong>
-
-                        </div>
-
-                        <div class="gestao-card">
-
-                            <span>
-                                LANÇAMENTOS
-                            </span>
-
-                            <strong id="total-custos">
-                                0
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- SIMULADOR -->
-
-                    <div class="painel">
-
-                        <h2>
-                            Simulador de custo de impressão
-                        </h2>
-
-                        <p>
-                            Selecione o filamento e informe
-                            o consumo da peça.
-                        </p>
-
-                        <div class="simulador-grid">
-
-                            <label>
-
-                                Filamento
-
-                                <select id="sim-filamento">
-
-                                    <option value="">
-                                        Selecione
-                                    </option>
-
-                                </select>
-
-                            </label>
-
-                            <label>
-
-                                Material utilizado (g)
-
-                                <input
-                                    type="number"
-                                    id="sim-gramas"
-                                    min="0"
-                                    step="0.01"
-                                    value="0"
-                                >
-
-                            </label>
-
-                            <label>
-
-                                Tempo de impressão (h)
-
-                                <input
-                                    type="number"
-                                    id="sim-horas"
-                                    min="0"
-                                    step="0.01"
-                                    value="0"
-                                >
-
-                            </label>
-
-                            <label>
-
-                                Potência média (W)
-
-                                <input
-                                    type="number"
-                                    id="sim-potencia"
-                                    min="0"
-                                    value="100"
-                                >
-
-                            </label>
-
-                            <label>
-
-                                Energia (R$/kWh)
-
-                                <input
-                                    type="number"
-                                    id="sim-energia"
-                                    min="0"
-                                    step="0.01"
-                                    value="1"
-                                >
-
-                            </label>
-
-                            <label>
-
-                                Acréscimo (%)
-
-                                <input
-                                    type="number"
-                                    id="sim-margem"
-                                    min="0"
-                                    step="1"
-                                    value="0"
-                                >
-
-                            </label>
-
-                        </div>
-
-
-                        <div class="resultado-custo">
-
-                            <div>
-
-                                <span>
-                                    MATERIAL
-                                </span>
-
-                                <strong id="sim-custo-material">
-                                    R$ 0,00
-                                </strong>
-
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    ENERGIA
-                                </span>
-
-                                <strong id="sim-custo-energia">
-                                    R$ 0,00
-                                </strong>
-
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    CUSTO DIRETO
-                                </span>
-
-                                <strong id="sim-custo-direto">
-                                    R$ 0,00
-                                </strong>
-
-                            </div>
-
-                            <div>
-
-                                <span>
-                                    VALOR CALCULADO
-                                </span>
-
-                                <strong id="sim-preco-sugerido">
-                                    R$ 0,00
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="painel">
-
-                        <div class="gestao-toolbar">
-
-                            <input
-                                type="search"
-                                id="buscar-custo"
-                                placeholder="Buscar custo..."
-                            >
-
-                            <select id="filtro-custo">
-
-                                <option value="Todos">
-                                    Todos
-                                </option>
-
-                                <option value="Fixo">
-                                    Fixo
-                                </option>
-
-                                <option value="Variável">
-                                    Variável
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                        <div class="tabela-container">
-
-                            <table>
-
-                                <thead>
-
-                                    <tr>
-                                        <th>DESCRIÇÃO</th>
-                                        <th>CATEGORIA</th>
-                                        <th>TIPO</th>
-                                        <th>VALOR</th>
-                                        <th>DATA</th>
-                                        <th>AÇÕES</th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody
-                                    id="tabela-custos"
-                                ></tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- FILAMENTOS -->
-
-                <section
-                    class="pagina"
-                    id="filamentos"
-                    hidden
-                >
-
-                    <div class="cabecalho-pagina">
-
-                        <div>
-
-                            <span class="subtitulo">
-                                MATÉRIA-PRIMA
-                            </span>
-
-                            <h1>
-                                Controle de
-                                <em>filamentos.</em>
-                            </h1>
-
-                            <p>
-                                Estoque, peso, cores
-                                e custo por grama.
-                            </p>
-
-                        </div>
-
-                        <div class="grupo-botoes">
-
-                            <button
-                                type="button"
-                                class="botao botao-secundario"
-                                id="exportar-filamentos"
-                            >
-                                Exportar CSV
-                            </button>
-
-                            <button
-                                type="button"
-                                class="botao botao-laranja"
-                                id="novo-filamento"
-                            >
-                                + Adicionar filamento
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="gestao-resumos">
-
-                        <div class="gestao-card">
-
-                            <span>
-                                ROLOS
-                            </span>
-
-                            <strong id="total-filamentos">
-                                0
-                            </strong>
-
-                        </div>
-
-                        <div class="gestao-card">
-
-                            <span>
-                                PESO DISPONÍVEL
-                            </span>
-
-                            <strong id="peso-filamentos">
-                                0 kg
-                            </strong>
-
-                        </div>
-
-                        <div class="gestao-card">
-
-                            <span>
-                                VALOR EM ESTOQUE
-                            </span>
-
-                            <strong id="valor-filamentos">
-                                R$ 0,00
-                            </strong>
-
-                        </div>
-
-                        <div class="gestao-card">
-
-                            <span>
-                                ESTOQUE BAIXO
-                            </span>
-
-                            <strong id="filamentos-baixos">
-                                0
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="painel">
-
-                        <div class="gestao-toolbar">
-
-                            <input
-                                type="search"
-                                id="buscar-filamento"
-                                placeholder="Buscar marca, material ou cor..."
-                            >
-
-                            <select id="filtro-material">
-
-                                <option value="Todos">
-                                    Todos os materiais
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                        <div class="tabela-container">
-
-                            <table>
-
-                                <thead>
-
-                                    <tr>
-                                        <th>FILAMENTO</th>
-                                        <th>MATERIAL</th>
-                                        <th>COR</th>
-                                        <th>RESTANTE</th>
-                                        <th>CUSTO/GRAMA</th>
-                                        <th>STATUS</th>
-                                        <th>AÇÕES</th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody
-                                    id="tabela-filamentos"
-                                ></tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- SINCRONIZAÇÃO -->
-
-                <section
-                    class="pagina"
-                    id="publicar"
-                    hidden
-                >
-
-                    <div class="cabecalho-pagina">
-
-                        <div>
-
-                            <span class="subtitulo">
-                                SUPABASE
-                            </span>
-
-                            <h1>
-                                Catálogo
-                                <em>sincronizado.</em>
-                            </h1>
-
-                        </div>
-
-                    </div>
-
-                    <div class="painel">
-
-                        <h2>
-                            Site dos clientes
-                        </h2>
-
-                        <p>
-
-                            Quando o catálogo é salvo aqui,
-                            a loja dos clientes recebe
-                            a nova versão pelo Supabase.
-
-                        </p>
-
-                        <div class="sync-empresa">
-
-                            <p id="status-sync">
-                                Verificando catálogo...
-                            </p>
-
-                            <button
-                                type="button"
-                                class="botao botao-secundario"
-                                id="recarregar-catalogo"
-                            >
-                                Recarregar catálogo
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="painel">
-
-                        <h2>
-                            Exportar catálogo
-                        </h2>
-
-                        <button
-                            type="button"
-                            class="botao botao-secundario"
-                            id="exportar-catalogo"
-                        >
-                            Exportar catalogo.js
-                        </button>
-
-                    </div>
-
-
-                    <div class="painel">
-
-                        <h2>
-                            Backup
-                        </h2>
-
-                        <div class="grupo-botoes">
-
-                            <button
-                                type="button"
-                                class="botao botao-secundario"
-                                id="baixar-backup"
-                            >
-                                Exportar backup
-                            </button>
-
-                            <label
-                                class="botao botao-secundario"
-                            >
-
-                                Restaurar backup
-
-                                <input
-                                    type="file"
-                                    id="restaurar-backup"
-                                    accept=".json,application/json"
-                                    hidden
-                                >
-
-                            </label>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-            </main>
-
-        </div>
+      <img
+        src="./src/assets/logo-criaitor3d.jpg"
+        alt="CriAItor 3D"
+        class="logo-empresa"
+        draggable="false"
+      >
 
     </div>
 
+    <p class="menu-titulo">
+      MENU PRINCIPAL
+    </p>
 
-    <!-- MODAL PRODUTO -->
+    <nav class="menu">
 
-    <dialog
-        class="modal"
-        id="modal-produto"
+      <button
+        class="menu-item ativo"
+        data-pagina="dashboard"
+        type="button"
+      >
+        ◈ Visão geral
+      </button>
+
+      <button
+        class="menu-item"
+        data-pagina="produtos"
+        type="button"
+      >
+        ▦ Produtos
+      </button>
+
+      <button
+        class="menu-item"
+        data-pagina="pedidos"
+        type="button"
+      >
+        ▤ Pedidos
+      </button>
+
+      <button
+        class="menu-item destaque-menu"
+        data-pagina="precificacao"
+        type="button"
+      >
+        ◆ Precificação
+      </button>
+
+      <button
+        class="menu-item"
+        data-pagina="custos"
+        type="button"
+      >
+        ◫ Custos
+      </button>
+
+      <button
+        class="menu-item"
+        data-pagina="filamentos"
+        type="button"
+      >
+        ◉ Filamentos
+      </button>
+
+      <button
+        class="menu-item"
+        data-pagina="publicar"
+        type="button"
+      >
+        ↥ Sincronização
+      </button>
+
+    </nav>
+
+    <div class="sidebar-rodape">
+
+      <strong>
+        ● CriAItor 3D
+      </strong>
+
+      <p>
+        Gestão de catálogo, estoque e formação de preço.
+      </p>
+
+    </div>
+
+  </aside>
+
+
+  <div class="conteudo">
+
+    <header class="topbar">
+
+      <div>
+
+        <small>
+          CRIAITOR 3D / ADMINISTRAÇÃO
+        </small>
+
+        <h2 id="titulo-pagina">
+          Visão geral
+        </h2>
+
+      </div>
+
+      <button
+        class="botao botao-laranja"
+        id="novo-produto-topo"
+        type="button"
+      >
+        + Novo produto
+      </button>
+
+    </header>
+
+
+    <main>
+
+      <div class="aviso">
+
+        Catálogo e fotos usam Supabase.
+        Custos, filamentos e precificação ficam
+        salvos neste navegador e entram no backup.
+
+      </div>
+
+
+      <!-- VISÃO GERAL -->
+
+      <section
+        class="pagina ativa"
+        id="dashboard"
+      >
+
+        <div class="cabecalho-pagina">
+
+          <div>
+
+            <span class="subtitulo">
+              PAINEL CRIAITOR 3D
+            </span>
+
+            <h1>
+              Bem-vindo ao <em>atelier.</em>
+            </h1>
+
+            <p>
+              Produtos, pedidos, precificação,
+              custos e matéria-prima em um único painel.
+            </p>
+
+          </div>
+
+          <span
+            class="data-atual"
+            id="data-atual"
+          ></span>
+
+        </div>
+
+
+        <div class="indicadores">
+
+          <div class="indicador">
+
+            <span>
+              PRODUTOS
+            </span>
+
+            <strong id="total-produtos">
+              0
+            </strong>
+
+            <small>
+              Cadastrados
+            </small>
+
+          </div>
+
+          <div class="indicador">
+
+            <span>
+              VISÍVEIS
+            </span>
+
+            <strong id="total-visiveis">
+              0
+            </strong>
+
+            <small>
+              Na loja
+            </small>
+
+          </div>
+
+          <div class="indicador">
+
+            <span>
+              ESTOQUE
+            </span>
+
+            <strong id="total-estoque">
+              0
+            </strong>
+
+            <small>
+              Unidades
+            </small>
+
+          </div>
+
+          <div class="indicador">
+
+            <span>
+              PEDIDOS ABERTOS
+            </span>
+
+            <strong id="total-pedidos">
+              0
+            </strong>
+
+            <small>
+              Em andamento
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <div class="painel">
+
+          <div class="painel-cabecalho">
+
+            <h2>
+              Produtos recentes
+            </h2>
+
+            <button
+              class="botao-link"
+              data-ir="produtos"
+              type="button"
+            >
+              Ver todos →
+            </button>
+
+          </div>
+
+          <div id="produtos-recentes">
+            Carregando...
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PRODUTOS -->
+
+      <section
+        class="pagina"
+        id="produtos"
+        hidden
+      >
+
+        <div class="cabecalho-pagina">
+
+          <div>
+
+            <span class="subtitulo">
+              CATÁLOGO
+            </span>
+
+            <h1>
+              Gerenciar <em>produtos.</em>
+            </h1>
+
+          </div>
+
+          <button
+            class="botao botao-laranja"
+            id="novo-produto"
+            type="button"
+          >
+            + Adicionar produto
+          </button>
+
+        </div>
+
+
+        <div class="painel">
+
+          <div class="barra-ferramentas">
+
+            <input
+              id="buscar-produto"
+              type="search"
+              placeholder="Buscar produto..."
+            >
+
+            <span id="contador-produtos">
+              0 produtos
+            </span>
+
+          </div>
+
+
+          <div class="tabela-container">
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>PRODUTO</th>
+                  <th>CATEGORIA</th>
+                  <th>PREÇO</th>
+                  <th>ESTOQUE</th>
+                  <th>VISIBILIDADE</th>
+                  <th>AÇÕES</th>
+                </tr>
+
+              </thead>
+
+              <tbody id="tabela-produtos"></tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PEDIDOS -->
+
+      <section
+        class="pagina"
+        id="pedidos"
+        hidden
+      >
+
+        <div class="cabecalho-pagina">
+
+          <div>
+
+            <span class="subtitulo">
+              VENDAS
+            </span>
+
+            <h1>
+              Controle de <em>pedidos.</em>
+            </h1>
+
+          </div>
+
+
+          <div class="grupo-botoes">
+
+            <button
+              class="botao botao-secundario"
+              id="exportar-pedidos"
+              type="button"
+            >
+              Exportar CSV
+            </button>
+
+            <button
+              class="botao botao-laranja"
+              id="novo-pedido"
+              type="button"
+            >
+              + Registrar pedido
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="painel">
+
+          <div class="tabela-container">
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>CLIENTE</th>
+                  <th>PRODUTOS</th>
+                  <th>VALOR</th>
+                  <th>STATUS</th>
+                  <th>DATA</th>
+                  <th>AÇÕES</th>
+                </tr>
+
+              </thead>
+
+              <tbody id="tabela-pedidos"></tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- PRECIFICAÇÃO -->
+
+      <section
+        class="pagina"
+        id="precificacao"
+        hidden
+      >
+
+        <div class="cabecalho-pagina">
+
+          <div>
+
+            <span class="subtitulo">
+              FORMAÇÃO DE PREÇO
+            </span>
+
+            <h1>
+              Precificação <em>completa.</em>
+            </h1>
+
+            <p>
+              Até 4 filamentos por peça, trocas de cor/material,
+              energia, depreciação, mão de obra, adicionais,
+              tributos, taxas e margem.
+            </p>
+
+          </div>
+
+
+          <button
+            class="botao botao-secundario"
+            id="exportar-historico-prec"
+            type="button"
+          >
+            Exportar histórico
+          </button>
+
+        </div>
+
+
+        <div class="painel painel-destaque">
+
+          <div class="painel-cabecalho">
+
+            <div>
+
+              <h2>
+                1. Produto e canal
+              </h2>
+
+              <p>
+                Vincule a um produto existente
+                ou calcule uma peça avulsa.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="grid-form">
+
+            <label class="campo">
+
+              <span>
+                Produto
+              </span>
+
+              <select id="prec-produto">
+
+                <option value="">
+                  Sem produto vinculado
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Canal de venda
+              </span>
+
+              <select id="prec-canal">
+
+                <option value="direta">
+                  Venda direta
+                </option>
+
+                <option value="site">
+                  Site CriAItor 3D
+                </option>
+
+                <option value="mercado_livre">
+                  Mercado Livre
+                </option>
+
+                <option value="shopee">
+                  Shopee
+                </option>
+
+                <option value="consignacao">
+                  Consignação
+                </option>
+
+                <option value="personalizado">
+                  Personalizado
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Taxa do canal (%)
+              </span>
+
+              <input
+                id="prec-taxa-canal"
+                type="number"
+                min="0"
+                step="0.01"
+                value="0"
+              >
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <div class="painel">
+
+          <h2>
+            2. Filamentos usados
+          </h2>
+
+          <p class="texto-fraco">
+
+            Selecione até 4 filamentos.
+
+            O código aparece primeiro — por exemplo
+            <strong>001</strong>.
+
+            Ao registrar a produção, o peso informado
+            é descontado automaticamente da aba Filamentos.
+
+          </p>
+
+
+          <div class="filamentos-prec-grid">
+
+            <div class="filamento-prec-card">
+
+              <strong>
+                Filamento 1
+              </strong>
+
+              <select id="prec-filamento-1"></select>
+
+              <label>
+
+                Consumo (g)
+
+                <input
+                  id="prec-gramas-1"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                >
+
+              </label>
+
+              <small id="prec-filamento-custo-1">
+                —
+              </small>
+
+            </div>
+
+
+            <div class="filamento-prec-card">
+
+              <strong>
+                Filamento 2
+              </strong>
+
+              <select id="prec-filamento-2"></select>
+
+              <label>
+
+                Consumo (g)
+
+                <input
+                  id="prec-gramas-2"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                >
+
+              </label>
+
+              <small id="prec-filamento-custo-2">
+                —
+              </small>
+
+            </div>
+
+
+            <div class="filamento-prec-card">
+
+              <strong>
+                Filamento 3
+              </strong>
+
+              <select id="prec-filamento-3"></select>
+
+              <label>
+
+                Consumo (g)
+
+                <input
+                  id="prec-gramas-3"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                >
+
+              </label>
+
+              <small id="prec-filamento-custo-3">
+                —
+              </small>
+
+            </div>
+
+
+            <div class="filamento-prec-card">
+
+              <strong>
+                Filamento 4
+              </strong>
+
+              <select id="prec-filamento-4"></select>
+
+              <label>
+
+                Consumo (g)
+
+                <input
+                  id="prec-gramas-4"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value="0"
+                >
+
+              </label>
+
+              <small id="prec-filamento-custo-4">
+                —
+              </small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="painel">
+
+          <h2>
+            3. Produção
+          </h2>
+
+
+          <div class="grid-form quatro">
+
+            <label class="campo">
+
+              <span>
+                Tempo de impressão (h)
+              </span>
+
+              <input
+                id="prec-horas"
+                type="number"
+                min="0"
+                step="0.01"
+                value="0"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Potência média (W)
+              </span>
+
+              <input
+                id="prec-potencia"
+                type="number"
+                min="0"
+                step="1"
+                value="100"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Energia (R$/kWh)
+              </span>
+
+              <input
+                id="prec-energia"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Perdas / purga / falhas (%)
+              </span>
+
+              <input
+                id="prec-perdas"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Mão de obra (min)
+              </span>
+
+              <input
+                id="prec-maoobra-min"
+                type="number"
+                min="0"
+                step="1"
+                value="0"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Mão de obra (R$/h)
+              </span>
+
+              <input
+                id="prec-maoobra-hora"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Valor da impressora (R$)
+              </span>
+
+              <input
+                id="prec-impressora-valor"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Vida útil estimada (h)
+              </span>
+
+              <input
+                id="prec-impressora-vida"
+                type="number"
+                min="0"
+                step="1"
+              >
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <div class="painel">
+
+          <div class="painel-cabecalho">
+
+            <div>
+
+              <h2>
+                4. Adicionais
+              </h2>
+
+              <p>
+                Argola, embalagem, etiqueta, ímã,
+                caixa ou qualquer outro item.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="prec-adicionais-lista"
+            class="adicionais-lista"
+          ></div>
+
+
+          <div class="adicional-novo">
+
+            <input
+              id="novo-adicional-nome"
+              type="text"
+              placeholder="Nome do adicional"
+            >
+
+            <input
+              id="novo-adicional-custo"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Custo R$"
+            >
+
+            <button
+              class="botao botao-secundario"
+              id="novo-adicional-btn"
+              type="button"
+            >
+              + Adicionar
+            </button>
+
+          </div>
+
+
+          <label class="campo campo-curto">
+
+            <span>
+              Outros custos fixos desta peça (R$)
+            </span>
+
+            <input
+              id="prec-outros-custos"
+              type="number"
+              min="0"
+              step="0.01"
+              value="0"
+            >
+
+          </label>
+
+        </div>
+
+
+        <div class="painel">
+
+          <h2>
+            5. Tributos, pagamento e margem
+          </h2>
+
+
+          <div class="grid-form quatro">
+
+            <label class="campo">
+
+              <span>
+                ICMS / tributo principal (%)
+              </span>
+
+              <input
+                id="prec-tributos"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Outros tributos (%)
+              </span>
+
+              <input
+                id="prec-outros-tributos"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Taxa de pagamento (%)
+              </span>
+
+              <input
+                id="prec-taxa-pagamento"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Taxa fixa de pagamento (R$)
+              </span>
+
+              <input
+                id="prec-taxa-fixa"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+
+            <label class="campo">
+
+              <span>
+                Margem desejada (%)
+              </span>
+
+              <input
+                id="prec-margem"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+          </div>
+
+
+          <p class="nota">
+
+            As alíquotas ficam configuráveis porque dependem
+            do regime tributário, operação e canal.
+
+            Preencha com os percentuais aplicáveis à empresa.
+
+          </p>
+
+        </div>
+
+
+        <div class="painel resultado-prec">
+
+          <h2>
+            6. Resultado
+          </h2>
+
+          <div
+            id="prec-erro"
+            class="erro-box"
+            hidden
+          ></div>
+
+
+          <div class="resultado-grid">
+
+            <div>
+              <span>Filamentos</span>
+              <strong id="r-material">R$ 0,00</strong>
+            </div>
+
+            <div>
+              <span>Energia</span>
+              <strong id="r-energia">R$ 0,00</strong>
+            </div>
+
+            <div>
+              <span>Depreciação</span>
+              <strong id="r-depreciacao">R$ 0,00</strong>
+            </div>
+
+            <div>
+              <span>Mão de obra</span>
+              <strong id="r-maoobra">R$ 0,00</strong>
+            </div>
+
+            <div>
+              <span>Perdas</span>
+              <strong id="r-perdas">R$ 0,00</strong>
+            </div>
+
+            <div>
+              <span>Adicionais</span>
+              <strong id="r-adicionais">R$ 0,00</strong>
+            </div>
+
+            <div class="resultado-chave">
+
+              <span>
+                Custo base
+              </span>
+
+              <strong id="r-custo-base">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Preço mínimo
+              </span>
+
+              <strong id="r-preco-minimo">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+            <div class="resultado-chave laranja">
+
+              <span>
+                Preço sugerido
+              </span>
+
+              <strong id="r-preco-sugerido">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Tributos estimados
+              </span>
+
+              <strong id="r-tributos">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Taxas estimadas
+              </span>
+
+              <strong id="r-taxas">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Lucro estimado
+              </span>
+
+              <strong id="r-lucro">
+                R$ 0,00
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="grupo-botoes acoes-prec">
+
+            <button
+              class="botao botao-secundario"
+              id="prec-salvar-calculo"
+              type="button"
+            >
+              Salvar cálculo
+            </button>
+
+            <button
+              class="botao botao-laranja"
+              id="prec-baixar-estoque"
+              type="button"
+            >
+              Registrar produção + dar baixa nos filamentos
+            </button>
+
+            <button
+              class="botao botao-roxo"
+              id="prec-atualizar-produto"
+              type="button"
+            >
+              Atualizar preço do produto
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="painel">
+
+          <div class="painel-cabecalho">
+
+            <h2>
+              7. Configurações padrão
+            </h2>
+
+            <button
+              class="botao botao-laranja"
+              id="salvar-config-prec"
+              type="button"
+            >
+              Salvar padrões
+            </button>
+
+          </div>
+
+
+          <div class="grid-form quatro">
+
+            <label class="campo">
+
+              <span>
+                Energia R$/kWh
+              </span>
+
+              <input
+                id="cfg-energia"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Mão de obra R$/h
+              </span>
+
+              <input
+                id="cfg-maoobra"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Perdas padrão %
+              </span>
+
+              <input
+                id="cfg-perdas"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                ICMS / tributo principal %
+              </span>
+
+              <input
+                id="cfg-tributos"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Outros tributos %
+              </span>
+
+              <input
+                id="cfg-outros-tributos"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Pagamento %
+              </span>
+
+              <input
+                id="cfg-taxa-pagamento"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Taxa fixa R$
+              </span>
+
+              <input
+                id="cfg-taxa-fixa"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Margem padrão %
+              </span>
+
+              <input
+                id="cfg-margem"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Valor impressora R$
+              </span>
+
+              <input
+                id="cfg-impressora-valor"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Vida útil impressora (h)
+              </span>
+
+              <input
+                id="cfg-impressora-vida"
+                type="number"
+                min="0"
+                step="1"
+              >
+
+            </label>
+
+          </div>
+
+
+          <h3>
+            Taxas por canal (%)
+          </h3>
+
+
+          <div class="grid-form seis">
+
+            <label class="campo">
+
+              <span>
+                Venda direta
+              </span>
+
+              <input
+                id="cfg-canal-direta"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Site
+              </span>
+
+              <input
+                id="cfg-canal-site"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Mercado Livre
+              </span>
+
+              <input
+                id="cfg-canal-ml"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Shopee
+              </span>
+
+              <input
+                id="cfg-canal-shopee"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Consignação
+              </span>
+
+              <input
+                id="cfg-canal-consignacao"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+            <label class="campo">
+
+              <span>
+                Personalizado
+              </span>
+
+              <input
+                id="cfg-canal-personalizado"
+                type="number"
+                min="0"
+                step="0.01"
+              >
+
+            </label>
+
+          </div>
+
+        </div>
+
+
+        <div class="painel">
+
+          <h2>
+            Histórico de precificação
+          </h2>
+
+
+          <div class="tabela-container">
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>DATA</th>
+                  <th>PRODUTO</th>
+                  <th>CANAL</th>
+                  <th>FILAMENTOS</th>
+                  <th>CUSTO</th>
+                  <th>PREÇO</th>
+                  <th>BAIXA</th>
+                </tr>
+
+              </thead>
+
+              <tbody id="tabela-historico-prec"></tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- CUSTOS -->
+
+      <section
+        class="pagina"
+        id="custos"
+        hidden
+      >
+
+        <div class="cabecalho-pagina">
+
+          <div>
+
+            <span class="subtitulo">
+              GESTÃO FINANCEIRA
+            </span>
+
+            <h1>
+              Controle de <em>custos.</em>
+            </h1>
+
+          </div>
+
+
+          <div class="grupo-botoes">
+
+            <button
+              class="botao botao-secundario"
+              id="exportar-custos"
+              type="button"
+            >
+              Exportar CSV
+            </button>
+
+            <button
+              class="botao botao-laranja"
+              id="novo-custo"
+              type="button"
+            >
+              + Adicionar custo
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="gestao-resumos">
+
+          <div class="gestao-card">
+
+            <span>
+              CUSTOS NO MÊS
+            </span>
+
+            <strong id="custos-mes">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+          <div class="gestao-card">
+
+            <span>
+              FIXOS
+            </span>
+
+            <strong id="custos-fixos">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+          <div class="gestao-card">
+
+            <span>
+              VARIÁVEIS
+            </span>
+
+            <strong id="custos-variaveis">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+          <div class="gestao-card">
+
+            <span>
+              LANÇAMENTOS
+            </span>
+
+            <strong id="total-custos">
+              0
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="painel">
+
+          <div class="gestao-toolbar">
+
+            <input
+              id="buscar-custo"
+              type="search"
+              placeholder="Buscar custo..."
+            >
+
+            <select id="filtro-custo">
+
+              <option value="Todos">
+                Todos
+              </option>
+
+              <option value="Fixo">
+                Fixo
+              </option>
+
+              <option value="Variável">
+                Variável
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="tabela-container">
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>DESCRIÇÃO</th>
+                  <th>CATEGORIA</th>
+                  <th>TIPO</th>
+                  <th>VALOR</th>
+                  <th>DATA</th>
+                  <th>AÇÕES</th>
+                </tr>
+
+              </thead>
+
+              <tbody id="tabela-custos"></tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- FILAMENTOS -->
+
+      <section
+        class="pagina"
+        id="filamentos"
+        hidden
+      >
+
+        <div class="cabecalho-pagina">
+
+          <div>
+
+            <span class="subtitulo">
+              MATÉRIA-PRIMA
+            </span>
+
+            <h1>
+              Controle de <em>filamentos.</em>
+            </h1>
+
+            <p>
+              Cada rolo recebe um código único
+              como 001, 002, 003...
+            </p>
+
+          </div>
+
+
+          <div class="grupo-botoes">
+
+            <button
+              class="botao botao-secundario"
+              id="exportar-filamentos"
+              type="button"
+            >
+              Exportar CSV
+            </button>
+
+            <button
+              class="botao botao-laranja"
+              id="novo-filamento"
+              type="button"
+            >
+              + Adicionar filamento
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="gestao-resumos">
+
+          <div class="gestao-card">
+
+            <span>
+              ROLOS
+            </span>
+
+            <strong id="total-filamentos">
+              0
+            </strong>
+
+          </div>
+
+          <div class="gestao-card">
+
+            <span>
+              PESO DISPONÍVEL
+            </span>
+
+            <strong id="peso-filamentos">
+              0 kg
+            </strong>
+
+          </div>
+
+          <div class="gestao-card">
+
+            <span>
+              VALOR EM ESTOQUE
+            </span>
+
+            <strong id="valor-filamentos">
+              R$ 0,00
+            </strong>
+
+          </div>
+
+          <div class="gestao-card">
+
+            <span>
+              ESTOQUE BAIXO
+            </span>
+
+            <strong id="filamentos-baixos">
+              0
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="painel">
+
+          <div class="gestao-toolbar">
+
+            <input
+              id="buscar-filamento"
+              type="search"
+              placeholder="Buscar código, marca, material ou cor..."
+            >
+
+            <select id="filtro-material">
+
+              <option value="Todos">
+                Todos os materiais
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="tabela-container">
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>CÓDIGO</th>
+                  <th>FILAMENTO</th>
+                  <th>COR</th>
+                  <th>RESTANTE</th>
+                  <th>CONSUMIDO</th>
+                  <th>CUSTO/G</th>
+                  <th>STATUS</th>
+                  <th>AÇÕES</th>
+                </tr>
+
+              </thead>
+
+              <tbody id="tabela-filamentos"></tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- SINCRONIZAÇÃO -->
+
+      <section
+        class="pagina"
+        id="publicar"
+        hidden
+      >
+
+        <div class="cabecalho-pagina">
+
+          <div>
+
+            <span class="subtitulo">
+              SUPABASE
+            </span>
+
+            <h1>
+              Catálogo <em>sincronizado.</em>
+            </h1>
+
+          </div>
+
+        </div>
+
+
+        <div class="painel">
+
+          <h2>
+            Sincronização
+          </h2>
+
+          <p id="status-sync">
+            Verificando catálogo...
+          </p>
+
+          <button
+            class="botao botao-secundario"
+            id="recarregar-catalogo"
+            type="button"
+          >
+            Recarregar catálogo
+          </button>
+
+        </div>
+
+
+        <div class="painel">
+
+          <h2>
+            Exportar catálogo
+          </h2>
+
+          <button
+            class="botao botao-secundario"
+            id="exportar-catalogo"
+            type="button"
+          >
+            Exportar catalogo.js
+          </button>
+
+        </div>
+
+
+        <div class="painel">
+
+          <h2>
+            Backup completo
+          </h2>
+
+          <div class="grupo-botoes">
+
+            <button
+              class="botao botao-secundario"
+              id="baixar-backup"
+              type="button"
+            >
+              Exportar backup
+            </button>
+
+            <label class="botao botao-secundario">
+
+              Restaurar backup
+
+              <input
+                type="file"
+                id="restaurar-backup"
+                accept=".json,application/json"
+                hidden
+              >
+
+            </label>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+</div>
+
+
+<!-- MODAL PRODUTO -->
+
+<dialog
+  class="modal"
+  id="modal-produto"
+>
+
+<form id="form-produto">
+
+  <div class="modal-cabecalho">
+
+    <h2 id="titulo-modal-produto">
+      Novo produto
+    </h2>
+
+    <button
+      type="button"
+      class="fechar-modal"
+      data-fechar="modal-produto"
     >
+      ×
+    </button>
 
-        <form id="form-produto">
-
-            <div class="modal-cabecalho">
-
-                <h2 id="titulo-modal-produto">
-                    Novo produto
-                </h2>
-
-                <button
-                    type="button"
-                    class="fechar-modal"
-                    data-fechar="modal-produto"
-                >
-                    ×
-                </button>
-
-            </div>
+  </div>
 
 
-            <div class="campos">
+  <div class="campos">
 
-                <label class="campo campo-inteiro">
+    <label class="campo campo-inteiro">
 
-                    Nome
+      <span>
+        Nome
+      </span>
 
-                    <input
-                        type="text"
-                        name="nome"
-                        required
-                    >
+      <input
+        name="nome"
+        required
+      >
 
-                </label>
-
-                <label class="campo">
-
-                    Categoria
-
-                    <input
-                        type="text"
-                        name="categoria"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Preço (R$)
-
-                    <input
-                        type="number"
-                        name="preco"
-                        min="0"
-                        step="0.01"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Estoque
-
-                    <input
-                        type="number"
-                        name="estoque"
-                        min="0"
-                        step="1"
-                        value="0"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Prazo
-
-                    <input
-                        type="text"
-                        name="prazo"
-                        value="Produção sob encomenda"
-                    >
-
-                </label>
-
-                <!-- fotos-empresa.js insere o upload aqui -->
-
-                <label
-                    class="campo campo-inteiro campo-url-legado"
-                >
-
-                    Foto
-
-                    <input
-                        type="text"
-                        name="imagem"
-                        readonly
-                    >
-
-                </label>
-
-                <label class="campo campo-inteiro">
-
-                    Descrição
-
-                    <textarea
-                        name="descricao"
-                        rows="4"
-                    ></textarea>
-
-                </label>
-
-                <label class="campo checkbox-campo">
-
-                    <input
-                        type="checkbox"
-                        name="disponivel"
-                        checked
-                    >
-
-                    Mostrar na loja
-
-                </label>
-
-                <label class="campo checkbox-campo">
-
-                    <input
-                        type="checkbox"
-                        name="destaque"
-                    >
-
-                    Produto em destaque
-
-                </label>
-
-            </div>
+    </label>
 
 
-            <div class="modal-acoes">
+    <label class="campo">
 
-                <button
-                    type="button"
-                    class="botao botao-secundario"
-                    data-fechar="modal-produto"
-                >
-                    Cancelar
-                </button>
+      <span>
+        Categoria
+      </span>
 
-                <button
-                    type="submit"
-                    class="botao botao-laranja"
-                    id="salvar-produto"
-                >
-                    Salvar produto
-                </button>
+      <input
+        name="categoria"
+        required
+      >
 
-            </div>
-
-        </form>
-
-    </dialog>
+    </label>
 
 
-    <!-- MODAL PEDIDO -->
+    <label class="campo">
 
-    <dialog
-        class="modal"
-        id="modal-pedido"
+      <span>
+        Preço (R$)
+      </span>
+
+      <input
+        type="number"
+        name="preco"
+        min="0"
+        step="0.01"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Estoque
+      </span>
+
+      <input
+        type="number"
+        name="estoque"
+        min="0"
+        step="1"
+        value="0"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Prazo
+      </span>
+
+      <input
+        name="prazo"
+        value="Produção sob encomenda"
+      >
+
+    </label>
+
+
+    <label class="campo campo-inteiro campo-url-legado">
+
+      <span>
+        Foto
+      </span>
+
+      <input
+        name="imagem"
+        readonly
+      >
+
+    </label>
+
+
+    <label class="campo campo-inteiro">
+
+      <span>
+        Descrição
+      </span>
+
+      <textarea
+        name="descricao"
+        rows="4"
+      ></textarea>
+
+    </label>
+
+
+    <label class="campo checkbox-campo">
+
+      <input
+        type="checkbox"
+        name="disponivel"
+        checked
+      >
+
+      <span>
+        Mostrar na loja
+      </span>
+
+    </label>
+
+
+    <label class="campo checkbox-campo">
+
+      <input
+        type="checkbox"
+        name="destaque"
+      >
+
+      <span>
+        Produto em destaque
+      </span>
+
+    </label>
+
+  </div>
+
+
+  <div class="modal-acoes">
+
+    <button
+      type="button"
+      class="botao botao-secundario"
+      data-fechar="modal-produto"
     >
+      Cancelar
+    </button>
 
-        <form id="form-pedido">
-
-            <div class="modal-cabecalho">
-
-                <h2>
-                    Registrar pedido
-                </h2>
-
-                <button
-                    type="button"
-                    class="fechar-modal"
-                    data-fechar="modal-pedido"
-                >
-                    ×
-                </button>
-
-            </div>
-
-            <div class="campos">
-
-                <label class="campo">
-
-                    Cliente
-
-                    <input
-                        type="text"
-                        name="cliente"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Contato
-
-                    <input
-                        type="text"
-                        name="contato"
-                    >
-
-                </label>
-
-                <label class="campo campo-inteiro">
-
-                    Produtos
-
-                    <textarea
-                        name="itens"
-                        rows="3"
-                        required
-                    ></textarea>
-
-                </label>
-
-                <label class="campo">
-
-                    Valor
-
-                    <input
-                        type="number"
-                        name="valor"
-                        min="0"
-                        step="0.01"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Status
-
-                    <select name="status">
-
-                        <option value="Novo">
-                            Novo
-                        </option>
-
-                        <option value="Em produção">
-                            Em produção
-                        </option>
-
-                        <option value="Pronto">
-                            Pronto
-                        </option>
-
-                        <option value="Entregue">
-                            Entregue
-                        </option>
-
-                        <option value="Cancelado">
-                            Cancelado
-                        </option>
-
-                    </select>
-
-                </label>
-
-            </div>
-
-            <div class="modal-acoes">
-
-                <button
-                    type="button"
-                    class="botao botao-secundario"
-                    data-fechar="modal-pedido"
-                >
-                    Cancelar
-                </button>
-
-                <button
-                    type="submit"
-                    class="botao botao-laranja"
-                >
-                    Salvar
-                </button>
-
-            </div>
-
-        </form>
-
-    </dialog>
-
-
-    <!-- MODAL CUSTO -->
-
-    <dialog
-        class="modal"
-        id="modal-custo"
+    <button
+      type="submit"
+      class="botao botao-laranja"
+      id="salvar-produto"
     >
+      Salvar produto
+    </button>
 
-        <form id="form-custo">
+  </div>
 
-            <div class="modal-cabecalho">
+</form>
 
-                <h2 id="titulo-modal-custo">
-                    Novo custo
-                </h2>
-
-                <button
-                    type="button"
-                    class="fechar-modal"
-                    data-fechar="modal-custo"
-                >
-                    ×
-                </button>
-
-            </div>
-
-            <div class="campos">
-
-                <label class="campo campo-inteiro">
-
-                    Descrição
-
-                    <input
-                        type="text"
-                        name="descricao"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Categoria
-
-                    <input
-                        type="text"
-                        name="categoria"
-                        placeholder="Energia, embalagem..."
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Tipo
-
-                    <select name="tipo">
-
-                        <option value="Variável">
-                            Variável
-                        </option>
-
-                        <option value="Fixo">
-                            Fixo
-                        </option>
-
-                    </select>
-
-                </label>
-
-                <label class="campo">
-
-                    Valor (R$)
-
-                    <input
-                        type="number"
-                        name="valor"
-                        min="0"
-                        step="0.01"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Data
-
-                    <input
-                        type="date"
-                        name="data"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo campo-inteiro">
-
-                    Observações
-
-                    <textarea
-                        name="observacoes"
-                        rows="3"
-                    ></textarea>
-
-                </label>
-
-            </div>
-
-            <div class="modal-acoes">
-
-                <button
-                    type="button"
-                    class="botao botao-secundario"
-                    data-fechar="modal-custo"
-                >
-                    Cancelar
-                </button>
-
-                <button
-                    type="submit"
-                    class="botao botao-laranja"
-                >
-                    Salvar
-                </button>
-
-            </div>
-
-        </form>
-
-    </dialog>
+</dialog>
 
 
-    <!-- MODAL FILAMENTO -->
+<!-- MODAL PEDIDO -->
 
-    <dialog
-        class="modal"
-        id="modal-filamento"
+<dialog
+  class="modal"
+  id="modal-pedido"
+>
+
+<form id="form-pedido">
+
+  <div class="modal-cabecalho">
+
+    <h2>
+      Pedido
+    </h2>
+
+    <button
+      type="button"
+      class="fechar-modal"
+      data-fechar="modal-pedido"
     >
+      ×
+    </button>
 
-        <form id="form-filamento">
-
-            <div class="modal-cabecalho">
-
-                <h2 id="titulo-modal-filamento">
-                    Novo filamento
-                </h2>
-
-                <button
-                    type="button"
-                    class="fechar-modal"
-                    data-fechar="modal-filamento"
-                >
-                    ×
-                </button>
-
-            </div>
+  </div>
 
 
-            <div class="campos">
+  <div class="campos">
 
-                <label class="campo">
+    <label class="campo">
 
-                    Marca
+      <span>
+        Cliente
+      </span>
 
-                    <input
-                        type="text"
-                        name="marca"
-                        required
-                    >
+      <input
+        name="cliente"
+        required
+      >
 
-                </label>
-
-                <label class="campo">
-
-                    Material
-
-                    <input
-                        type="text"
-                        name="material"
-                        placeholder="PLA, PETG, PETG CF..."
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Cor
-
-                    <input
-                        type="text"
-                        name="cor"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Diâmetro (mm)
-
-                    <input
-                        type="number"
-                        name="diametro"
-                        step="0.01"
-                        value="1.75"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Peso original (g)
-
-                    <input
-                        type="number"
-                        name="pesoOriginal"
-                        value="1000"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Peso restante (g)
-
-                    <input
-                        type="number"
-                        name="pesoRestante"
-                        value="1000"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Valor pago (R$)
-
-                    <input
-                        type="number"
-                        name="valorPago"
-                        min="0"
-                        step="0.01"
-                        required
-                    >
-
-                </label>
-
-                <label class="campo">
-
-                    Avisar abaixo de (g)
-
-                    <input
-                        type="number"
-                        name="limiteBaixo"
-                        min="0"
-                        value="200"
-                    >
-
-                </label>
-
-                <label class="campo campo-inteiro">
-
-                    Observações
-
-                    <textarea
-                        name="observacoes"
-                        rows="3"
-                    ></textarea>
-
-                </label>
-
-            </div>
+    </label>
 
 
-            <div class="modal-acoes">
+    <label class="campo">
 
-                <button
-                    type="button"
-                    class="botao botao-secundario"
-                    data-fechar="modal-filamento"
-                >
-                    Cancelar
-                </button>
+      <span>
+        Contato
+      </span>
 
-                <button
-                    type="submit"
-                    class="botao botao-laranja"
-                >
-                    Salvar
-                </button>
+      <input name="contato">
 
-            </div>
-
-        </form>
-
-    </dialog>
+    </label>
 
 
-    <div
-        class="notificacao"
-        id="notificacao"
-        role="status"
-        aria-live="polite"
-    ></div>
+    <label class="campo campo-inteiro">
+
+      <span>
+        Produtos
+      </span>
+
+      <textarea
+        name="itens"
+        required
+      ></textarea>
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Valor
+      </span>
+
+      <input
+        type="number"
+        name="valor"
+        min="0"
+        step="0.01"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Status
+      </span>
+
+      <select name="status">
+
+        <option>
+          Novo
+        </option>
+
+        <option>
+          Em produção
+        </option>
+
+        <option>
+          Pronto
+        </option>
+
+        <option>
+          Entregue
+        </option>
+
+        <option>
+          Cancelado
+        </option>
+
+      </select>
+
+    </label>
+
+  </div>
+
+
+  <div class="modal-acoes">
+
+    <button
+      type="button"
+      class="botao botao-secundario"
+      data-fechar="modal-pedido"
+    >
+      Cancelar
+    </button>
+
+    <button
+      type="submit"
+      class="botao botao-laranja"
+    >
+      Salvar
+    </button>
+
+  </div>
+
+</form>
+
+</dialog>
+
+
+<!-- MODAL CUSTO -->
+
+<dialog
+  class="modal"
+  id="modal-custo"
+>
+
+<form id="form-custo">
+
+  <div class="modal-cabecalho">
+
+    <h2 id="titulo-modal-custo">
+      Novo custo
+    </h2>
+
+    <button
+      type="button"
+      class="fechar-modal"
+      data-fechar="modal-custo"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div class="campos">
+
+    <label class="campo campo-inteiro">
+
+      <span>
+        Descrição
+      </span>
+
+      <input
+        name="descricao"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Categoria
+      </span>
+
+      <input
+        name="categoria"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Tipo
+      </span>
+
+      <select name="tipo">
+
+        <option>
+          Variável
+        </option>
+
+        <option>
+          Fixo
+        </option>
+
+      </select>
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Valor
+      </span>
+
+      <input
+        type="number"
+        name="valor"
+        min="0"
+        step="0.01"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Data
+      </span>
+
+      <input
+        type="date"
+        name="data"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo campo-inteiro">
+
+      <span>
+        Observações
+      </span>
+
+      <textarea
+        name="observacoes"
+        rows="3"
+      ></textarea>
+
+    </label>
+
+  </div>
+
+
+  <div class="modal-acoes">
+
+    <button
+      type="button"
+      class="botao botao-secundario"
+      data-fechar="modal-custo"
+    >
+      Cancelar
+    </button>
+
+    <button
+      type="submit"
+      class="botao botao-laranja"
+    >
+      Salvar
+    </button>
+
+  </div>
+
+</form>
+
+</dialog>
+
+
+<!-- MODAL FILAMENTO -->
+
+<dialog
+  class="modal"
+  id="modal-filamento"
+>
+
+<form id="form-filamento">
+
+  <div class="modal-cabecalho">
+
+    <h2 id="titulo-modal-filamento">
+      Novo filamento
+    </h2>
+
+    <button
+      type="button"
+      class="fechar-modal"
+      data-fechar="modal-filamento"
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div class="campos">
+
+    <label class="campo">
+
+      <span>
+        Código
+      </span>
+
+      <input
+        name="codigo"
+        placeholder="001"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Marca
+      </span>
+
+      <input
+        name="marca"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Material
+      </span>
+
+      <input
+        name="material"
+        placeholder="PLA, PETG..."
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Cor
+      </span>
+
+      <input
+        name="cor"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Diâmetro (mm)
+      </span>
+
+      <input
+        type="number"
+        name="diametro"
+        step="0.01"
+        value="1.75"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Peso original (g)
+      </span>
+
+      <input
+        type="number"
+        name="pesoOriginal"
+        value="1000"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Peso restante (g)
+      </span>
+
+      <input
+        type="number"
+        name="pesoRestante"
+        value="1000"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Valor pago (R$)
+      </span>
+
+      <input
+        type="number"
+        name="valorPago"
+        min="0"
+        step="0.01"
+        required
+      >
+
+    </label>
+
+
+    <label class="campo">
+
+      <span>
+        Estoque baixo abaixo de (g)
+      </span>
+
+      <input
+        type="number"
+        name="limiteBaixo"
+        min="0"
+        value="200"
+      >
+
+    </label>
+
+
+    <label class="campo campo-inteiro">
+
+      <span>
+        Observações
+      </span>
+
+      <textarea
+        name="observacoes"
+        rows="3"
+      ></textarea>
+
+    </label>
+
+  </div>
+
+
+  <div class="modal-acoes">
+
+    <button
+      type="button"
+      class="botao botao-secundario"
+      data-fechar="modal-filamento"
+    >
+      Cancelar
+    </button>
+
+    <button
+      type="submit"
+      class="botao botao-laranja"
+    >
+      Salvar
+    </button>
+
+  </div>
+
+</form>
+
+</dialog>
+
+
+<div
+  class="notificacao"
+  id="notificacao"
+  role="status"
+  aria-live="polite"
+></div>
 
 </body>
-
 </html>
