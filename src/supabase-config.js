@@ -1,7 +1,9 @@
 "use strict";
 
+
 const SUPABASE_URL =
     "https://odmshtzmvtgkuxnysqor.supabase.co";
+
 
 const SUPABASE_PUBLIC_KEY =
     "sb_publishable_iGeAejP8oNb0hUy7FhThIQ_MMbzZV2c";
@@ -27,11 +29,14 @@ window.sb =
 
             auth: {
 
-                persistSession: false,
+                persistSession:
+                    false,
 
-                autoRefreshToken: false,
+                autoRefreshToken:
+                    false,
 
-                detectSessionInUrl: false
+                detectSessionInUrl:
+                    false
 
             }
 
