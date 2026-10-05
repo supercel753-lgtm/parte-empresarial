@@ -11,18 +11,21 @@ const admin =
     window.CRIAITOR_ADMIN;
 
 
+const configuracao =
+    window.CRIAITOR_SUPABASE_CONFIG ||
+    {};
+
+
 const CONFIG = {
 
     tabela:
 
-        window.CRIAITOR_SUPABASE_CONFIG
-            ?.tabelaCatalogo ||
+        configuracao.tabelaCatalogo ||
         "catalogo",
 
     registro:
 
-        window.CRIAITOR_SUPABASE_CONFIG
-            ?.registroCatalogo ||
+        configuracao.registroCatalogo ||
         1,
 
     canal:
@@ -38,10 +41,6 @@ let canal =
 let verificando =
     false;
 
-
-/* =====================================================
-   STATUS
-===================================================== */
 
 function status(
 
@@ -72,18 +71,14 @@ function status(
 
         erro
 
-            ? "#ff9797"
+        ? "#ff9797"
 
-            : "#91e4b1";
+        : "#91e4b1";
 
 }
 
 
-/* =====================================================
-   VERIFICAR VERSÃO
-===================================================== */
-
-async function verificarVersao() {
+async function verificar() {
 
     if (
 
@@ -105,16 +100,17 @@ async function verificarVersao() {
     try {
 
         const {
-
             data,
-
             error
-
         } = await sb
 
-            .from(CONFIG.tabela)
+            .from(
+                CONFIG.tabela
+            )
 
-            .select("versao")
+            .select(
+                "versao"
+            )
 
             .eq(
                 "id",
@@ -131,24 +127,24 @@ async function verificarVersao() {
         }
 
 
-        const versaoRemota =
-
+        const remoto =
             Number(
                 data.versao
-            ) || 0;
+            ) ||
+            0;
 
 
-        const versaoLocal =
-
+        const local =
             Number(
                 admin.getVersao()
-            ) || 0;
+            ) ||
+            0;
 
 
         if (
 
-            versaoRemota !==
-            versaoLocal
+            remoto !==
+            local
 
         ) {
 
@@ -161,31 +157,24 @@ async function verificarVersao() {
 
 
             status(
-
-                "Catálogo atualizado • versão " +
-
-                versaoRemota
-
+                `Sincronizado • versão ${remoto}`
             );
 
 
         } else {
 
             status(
-
-                "Sincronizado • versão " +
-
-                versaoLocal
-
+                `Sincronizado • versão ${local}`
             );
 
         }
 
 
-    } catch (erro) {
+    } catch (
+        erro
+    ) {
 
         console.warn(
-            "Erro de sincronização:",
             erro
         );
 
@@ -209,16 +198,12 @@ async function verificarVersao() {
 }
 
 
-/* =====================================================
-   REALTIME
-===================================================== */
-
-function iniciarRealtime() {
+function iniciar() {
 
     if (
 
         !sb ||
-        canal
+        !admin
 
     ) {
 
@@ -227,67 +212,75 @@ function iniciarRealtime() {
     }
 
 
-    canal = sb
+    if (!canal) {
 
-        .channel(
-            CONFIG.canal
-        )
+        canal = sb
 
-        .on(
+            .channel(
+                CONFIG.canal
+            )
 
-            "postgres_changes",
+            .on(
 
-            {
+                "postgres_changes",
 
-                event:
-                    "UPDATE",
+                {
 
-                schema:
-                    "public",
+                    event:
+                        "UPDATE",
 
-                table:
-                    CONFIG.tabela,
+                    schema:
+                        "public",
 
-                filter:
-                    `id=eq.${CONFIG.registro}`
+                    table:
+                        CONFIG.tabela,
 
-            },
+                    filter:
+                        `id=eq.${CONFIG.registro}`
 
-            () => {
+                },
 
-                verificarVersao();
+                verificar
 
-            }
+            )
 
-        )
+            .subscribe(
 
-        .subscribe(
+                resultado => {
 
-            resultado => {
+                    if (
 
-                if (
+                        resultado ===
+                        "SUBSCRIBED"
 
-                    resultado ===
-                    "SUBSCRIBED"
+                    ) {
 
-                ) {
+                        status(
+                            "Atualização automática ativa"
+                        );
 
-                    status(
-                        "Atualização automática ativa"
-                    );
+                    }
 
                 }
 
-            }
+            );
 
-        );
+    }
+
+
+    verificar();
+
+
+    setInterval(
+
+        verificar,
+
+        30000
+
+    );
 
 }
 
-
-/* =====================================================
-   EVENTOS
-===================================================== */
 
 document.addEventListener(
 
@@ -295,9 +288,13 @@ document.addEventListener(
 
     () => {
 
-        if (!document.hidden) {
+        if (
 
-            verificarVersao();
+            !document.hidden
+
+        ) {
+
+            verificar();
 
         }
 
@@ -310,7 +307,7 @@ window.addEventListener(
 
     "online",
 
-    verificarVersao
+    verificar
 
 );
 
@@ -319,50 +316,9 @@ window.addEventListener(
 
     "pageshow",
 
-    verificarVersao
+    verificar
 
 );
-
-
-/* =====================================================
-   INICIAR
-===================================================== */
-
-function iniciar() {
-
-    if (
-
-        !sb ||
-        !admin
-
-    ) {
-
-        console.warn(
-
-            "CriAItor Sync: aguardando dependências."
-
-        );
-
-        return;
-
-    }
-
-
-    iniciarRealtime();
-
-
-    verificarVersao();
-
-
-    setInterval(
-
-        verificarVersao,
-
-        30000
-
-    );
-
-}
 
 
 if (
@@ -379,10 +335,12 @@ if (
         iniciar,
 
         {
-            once: true
+            once:
+                true
         }
 
     );
+
 
 } else {
 
@@ -391,22 +349,16 @@ if (
 }
 
 
-/* =====================================================
-   API
-===================================================== */
-
 window.CRIAITOR_SYNC = {
 
-    verificar:
-        verificarVersao,
+    verificar,
 
     recarregar:
-
         async () => {
 
             await admin.recarregar();
 
-            await verificarVersao();
+            await verificar();
 
         }
 
