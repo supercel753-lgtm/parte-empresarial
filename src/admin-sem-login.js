@@ -18,47 +18,225 @@ const CONFIG = {
 };
 
 
-const sb = window.sb;
+const sb =
+    window.sb;
 
 
-const estado = {
+const $ =
+    seletor =>
+        document.querySelector(
+            seletor
+        );
 
-    produtos: [],
 
-    pedidos: [],
+const $$ =
+    seletor =>
+        Array.from(
+            document.querySelectorAll(
+                seletor
+            )
+        );
 
-    custos: [],
 
-    filamentos: [],
+const KEYS = {
 
-    versao: 0,
+    pedidos:
+        "criaitor3d_pedidos",
 
-    produtoEditando: null,
+    custos:
+        "criaitor3d_custos",
 
-    pedidoEditando: null,
+    filamentos:
+        "criaitor3d_filamentos",
 
-    custoEditando: null,
+    precConfig:
+        "criaitor3d_precificacao_config",
 
-    filamentoEditando: null,
+    adicionais:
+        "criaitor3d_precificacao_adicionais",
 
-    salvandoCatalogo: false
+    historico:
+        "criaitor3d_precificacao_historico"
 
 };
 
 
-const $ = seletor =>
-    document.querySelector(seletor);
+const CONFIG_PADRAO = {
+
+    energiaKwh:
+        1,
+
+    maoObraHora:
+        20,
+
+    perdasPct:
+        10,
+
+    tributosPct:
+        0,
+
+    outrosTributosPct:
+        0,
+
+    taxaPagamentoPct:
+        0,
+
+    taxaPagamentoFixa:
+        0,
+
+    margemPct:
+        40,
+
+    impressoraValor:
+        2500,
+
+    impressoraVidaHoras:
+        5000,
+
+    canais: {
+
+        direta:
+            0,
+
+        site:
+            0,
+
+        mercado_livre:
+            0,
+
+        shopee:
+            0,
+
+        consignacao:
+            0,
+
+        personalizado:
+            0
+
+    }
+
+};
 
 
-const $$ = seletor =>
-    Array.from(
-        document.querySelectorAll(seletor)
+const ADICIONAIS_PADRAO = [
+
+    {
+        id:
+            "argola-chaveiro",
+
+        nome:
+            "Argola de chaveiro",
+
+        custo:
+            0
+    },
+
+    {
+        id:
+            "saquinho",
+
+        nome:
+            "Saquinho / embalagem simples",
+
+        custo:
+            0
+    },
+
+    {
+        id:
+            "etiqueta",
+
+        nome:
+            "Etiqueta",
+
+        custo:
+            0
+    },
+
+    {
+        id:
+            "caixa",
+
+        nome:
+            "Caixa",
+
+        custo:
+            0
+    },
+
+    {
+        id:
+            "papel-bolha",
+
+        nome:
+            "Papel bolha",
+
+        custo:
+            0
+    }
+
+];
+
+
+const estado = {
+
+    produtos:
+        [],
+
+    versao:
+        0,
+
+    salvandoCatalogo:
+        false,
+
+    pedidos:
+        [],
+
+    custos:
+        [],
+
+    filamentos:
+        [],
+
+    precConfig:
+        copiar(
+            CONFIG_PADRAO
+        ),
+
+    adicionais:
+        [],
+
+    historico:
+        [],
+
+    produtoEditando:
+        null,
+
+    pedidoEditando:
+        null,
+
+    custoEditando:
+        null,
+
+    filamentoEditando:
+        null,
+
+    ultimoCalculo:
+        null
+
+};
+
+
+function copiar(objeto) {
+
+    return JSON.parse(
+        JSON.stringify(
+            objeto
+        )
     );
 
+}
 
-/* =====================================================
-   UTILITÁRIOS
-===================================================== */
 
 function numero(valor) {
 
@@ -79,35 +257,50 @@ function dinheiro(valor) {
         "pt-BR",
 
         {
+            style:
+                "currency",
 
-            style: "currency",
-
-            currency: "BRL"
-
+            currency:
+                "BRL"
         }
 
     ).format(
-
         numero(valor)
-
     );
 
 }
 
 
-function escaparHTML(valor) {
+function esc(valor) {
 
-    return String(valor ?? "")
+    return String(
+        valor ?? ""
+    )
 
-        .replaceAll("&", "&amp;")
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
 
-        .replaceAll("<", "&lt;")
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
 
-        .replaceAll(">", "&gt;")
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
 
-        .replaceAll('"', "&quot;")
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
 
-        .replaceAll("'", "&#39;");
+    .replaceAll(
+        "'",
+        "&#39;"
+    );
 
 }
 
@@ -128,7 +321,10 @@ function criarID() {
 
     return (
 
-        Date.now().toString(36) +
+        Date.now()
+            .toString(36)
+
+        +
 
         Math.random()
             .toString(36)
@@ -151,7 +347,10 @@ function dataHoje() {
 
     return new Date()
         .toISOString()
-        .slice(0, 10);
+        .slice(
+            0,
+            10
+        );
 
 }
 
@@ -174,7 +373,9 @@ function formatarData(valor) {
                 "T12:00:00"
             )
 
-            : new Date(valor);
+            : new Date(
+                valor
+            );
 
 
     if (
@@ -190,17 +391,73 @@ function formatarData(valor) {
     }
 
 
-    return data
-        .toLocaleDateString(
-            "pt-BR"
-        );
+    return data.toLocaleString(
+        "pt-BR"
+    );
 
 }
 
 
-/* =====================================================
-   AVISOS
-===================================================== */
+function lerLocal(
+
+    chave,
+
+    fallback
+
+) {
+
+    try {
+
+        const bruto =
+            localStorage.getItem(
+                chave
+            );
+
+
+        return bruto
+
+            ? JSON.parse(
+                bruto
+            )
+
+            : copiar(
+                fallback
+            );
+
+
+    } catch {
+
+        return copiar(
+            fallback
+        );
+
+    }
+
+}
+
+
+function salvarLocal(
+
+    chave,
+
+    valor
+
+) {
+
+    localStorage.setItem(
+
+        chave,
+
+        JSON.stringify(
+            valor
+        )
+
+    );
+
+}
+
+
+/* AVISOS */
 
 let timerAviso;
 
@@ -269,131 +526,173 @@ function avisar(
 }
 
 
-/* =====================================================
-   LOCAL STORAGE
-===================================================== */
+/* LOCAL */
 
-function chaveLocal(tipo) {
+function carregarLocais() {
 
-    return (
-        "criaitor3d_" +
-        tipo
-    );
+    estado.pedidos =
+        lerLocal(
+            KEYS.pedidos,
+            []
+        );
+
+
+    estado.custos =
+        lerLocal(
+            KEYS.custos,
+            []
+        );
+
+
+    estado.filamentos =
+        lerLocal(
+            KEYS.filamentos,
+            []
+        );
+
+
+    estado.precConfig = {
+
+        ...copiar(
+            CONFIG_PADRAO
+        ),
+
+        ...lerLocal(
+            KEYS.precConfig,
+            CONFIG_PADRAO
+        )
+
+    };
+
+
+    estado.precConfig.canais = {
+
+        ...CONFIG_PADRAO.canais,
+
+        ...(
+            estado.precConfig
+                .canais ||
+            {}
+        )
+
+    };
+
+
+    estado.adicionais =
+        lerLocal(
+
+            KEYS.adicionais,
+
+            ADICIONAIS_PADRAO
+
+        );
+
+
+    estado.historico =
+        lerLocal(
+
+            KEYS.historico,
+
+            []
+
+        );
+
+
+    migrarCodigosFilamentos();
 
 }
 
 
-function lerLocal(tipo) {
+function migrarCodigosFilamentos() {
 
-    try {
+    const usados =
+        new Set(
 
-        const bruto =
-            localStorage.getItem(
-                chaveLocal(tipo)
+            estado.filamentos
+
+            .map(
+
+                filamento =>
+                    String(
+                        filamento.codigo ||
+                        ""
+                    ).trim()
+
+            )
+
+            .filter(Boolean)
+
+        );
+
+
+    let mudou =
+        false;
+
+
+    for (
+
+        const filamento
+        of estado.filamentos
+
+    ) {
+
+        if (!filamento.codigo) {
+
+            let numeroCodigo =
+                1;
+
+            let codigo;
+
+
+            do {
+
+                codigo =
+                    String(
+                        numeroCodigo++
+                    )
+                    .padStart(
+                        3,
+                        "0"
+                    );
+
+            } while (
+
+                usados.has(
+                    codigo
+                )
+
             );
 
 
-        if (!bruto) {
+            filamento.codigo =
+                codigo;
 
-            return [];
+
+            usados.add(
+                codigo
+            );
+
+
+            mudou =
+                true;
 
         }
 
-
-        const dados =
-            JSON.parse(bruto);
+    }
 
 
-        return Array.isArray(dados)
+    if (mudou) {
 
-            ? dados
-
-            : [];
-
-
-    } catch {
-
-        return [];
+        salvarFilamentosLocal(
+            false
+        );
 
     }
 
 }
 
 
-function gravarLocal(
-
-    tipo,
-
-    dados
-
-) {
-
-    localStorage.setItem(
-
-        chaveLocal(tipo),
-
-        JSON.stringify(dados)
-
-    );
-
-}
-
-
-function carregarDadosLocais() {
-
-    estado.pedidos =
-        lerLocal("pedidos");
-
-
-    estado.custos =
-        lerLocal("custos");
-
-
-    estado.filamentos =
-        lerLocal("filamentos");
-
-}
-
-
-function salvarPedidosLocal() {
-
-    gravarLocal(
-        "pedidos",
-        estado.pedidos
-    );
-
-    atualizarPainel();
-
-}
-
-
-function salvarCustosLocal() {
-
-    gravarLocal(
-        "custos",
-        estado.custos
-    );
-
-    atualizarPainel();
-
-}
-
-
-function salvarFilamentosLocal() {
-
-    gravarLocal(
-        "filamentos",
-        estado.filamentos
-    );
-
-    atualizarPainel();
-
-}
-
-
-/* =====================================================
-   CATÁLOGO
-===================================================== */
+/* SUPABASE */
 
 async function carregarCatalogo() {
 
@@ -407,14 +706,13 @@ async function carregarCatalogo() {
 
 
     const {
-
         data,
-
         error
-
     } = await sb
 
-        .from(CONFIG.tabela)
+        .from(
+            CONFIG.tabela
+        )
 
         .select(
             "produtos, versao"
@@ -487,18 +785,18 @@ async function salvarCatalogo(
     try {
 
         const novaVersao =
-            estado.versao + 1;
+            estado.versao +
+            1;
 
 
         const {
-
             data,
-
             error
-
         } = await sb
 
-            .from(CONFIG.tabela)
+            .from(
+                CONFIG.tabela
+            )
 
             .update({
 
@@ -534,15 +832,13 @@ async function salvarCatalogo(
         if (
 
             !data ||
-            data.length === 0
+            !data.length
 
         ) {
 
             throw new Error(
 
-                "O catálogo foi alterado " +
-
-                "em outra sessão. " +
+                "O catálogo foi alterado em outra sessão. " +
 
                 "Recarregue a página."
 
@@ -552,7 +848,14 @@ async function salvarCatalogo(
 
 
         estado.produtos =
-            data[0].produtos;
+
+            Array.isArray(
+                data[0].produtos
+            )
+
+                ? data[0].produtos
+
+                : [];
 
 
         estado.versao =
@@ -574,11 +877,11 @@ async function salvarCatalogo(
 }
 
 
-/* =====================================================
-   NAVEGAÇÃO
-===================================================== */
+/* NAVEGAÇÃO */
 
-function abrirPagina(nome) {
+function abrirPagina(
+    nome
+) {
 
     $$(".pagina")
         .forEach(
@@ -586,7 +889,8 @@ function abrirPagina(nome) {
             pagina => {
 
                 const ativa =
-                    pagina.id === nome;
+                    pagina.id ===
+                    nome;
 
 
                 pagina.hidden =
@@ -615,7 +919,8 @@ function abrirPagina(nome) {
 
                     "ativo",
 
-                    botao.dataset.pagina ===
+                    botao.dataset
+                        .pagina ===
                     nome
 
                 );
@@ -635,6 +940,9 @@ function abrirPagina(nome) {
 
         pedidos:
             "Pedidos",
+
+        precificacao:
+            "Precificação",
 
         custos:
             "Custos",
@@ -658,37 +966,166 @@ function abrirPagina(nome) {
 
     }
 
+
+    if (
+
+        nome ===
+        "precificacao"
+
+    ) {
+
+        renderizarPrecificacao();
+
+    }
+
 }
 
 
-/* =====================================================
-   DASHBOARD
-===================================================== */
+/* SALVAMENTOS LOCAIS */
+
+function salvarPedidosLocal() {
+
+    salvarLocal(
+
+        KEYS.pedidos,
+
+        estado.pedidos
+
+    );
+
+
+    atualizarPainel();
+
+}
+
+
+function salvarCustosLocal() {
+
+    salvarLocal(
+
+        KEYS.custos,
+
+        estado.custos
+
+    );
+
+
+    atualizarPainel();
+
+}
+
+
+function salvarFilamentosLocal(
+    atualizar = true
+) {
+
+    salvarLocal(
+
+        KEYS.filamentos,
+
+        estado.filamentos
+
+    );
+
+
+    if (atualizar) {
+
+        atualizarPainel();
+
+    }
+
+}
+
+
+function salvarPrecConfig() {
+
+    salvarLocal(
+
+        KEYS.precConfig,
+
+        estado.precConfig
+
+    );
+
+}
+
+
+function salvarAdicionais() {
+
+    salvarLocal(
+
+        KEYS.adicionais,
+
+        estado.adicionais
+
+    );
+
+
+    renderizarAdicionais();
+
+    calcularPrecificacao();
+
+}
+
+
+function salvarHistorico() {
+
+    salvarLocal(
+
+        KEYS.historico,
+
+        estado.historico
+
+    );
+
+
+    renderizarHistorico();
+
+}
+
+
+/* DASHBOARD */
 
 function atualizarIndicadores() {
 
-    const visiveis =
+    $("#total-produtos")
+        .textContent =
+        estado.produtos.length;
 
-        estado.produtos.filter(
 
-            item =>
+    $("#total-visiveis")
+        .textContent =
 
-                item.disponivel !==
+        estado.produtos
+
+        .filter(
+
+            produto =>
+
+                produto.disponivel !==
                 false
 
-        );
+        )
+
+        .length;
 
 
-    const estoque =
+    $("#total-estoque")
+        .textContent =
 
-        estado.produtos.reduce(
+        estado.produtos
 
-            (total, item) =>
+        .reduce(
+
+            (
+                total,
+                produto
+            ) =>
 
                 total +
 
                 numero(
-                    item.estoque
+                    produto.estoque
                 ),
 
             0
@@ -696,47 +1133,38 @@ function atualizarIndicadores() {
         );
 
 
-    const pedidosAbertos =
+    $("#total-pedidos")
+        .textContent =
 
-        estado.pedidos.filter(
+        estado.pedidos
 
-            item =>
+        .filter(
+
+            pedido =>
 
                 ![
                     "Entregue",
                     "Cancelado"
-                ].includes(
-                    item.status
+                ]
+
+                .includes(
+                    pedido.status
                 )
 
-        );
+        )
 
-
-    $("#total-produtos").textContent =
-        estado.produtos.length;
-
-
-    $("#total-visiveis").textContent =
-        visiveis.length;
-
-
-    $("#total-estoque").textContent =
-        estoque;
-
-
-    $("#total-pedidos").textContent =
-        pedidosAbertos.length;
+        .length;
 
 }
 
 
 function renderizarRecentes() {
 
-    const container =
+    const elemento =
         $("#produtos-recentes");
 
 
-    if (!container) {
+    if (!elemento) {
 
         return;
 
@@ -747,42 +1175,30 @@ function renderizarRecentes() {
 
         estado.produtos
 
-        .slice(-5)
+        .slice(
+            -5
+        )
 
         .reverse();
 
 
-    if (!lista.length) {
+    elemento.innerHTML =
 
-        container.innerHTML = `
+        lista.length
 
-            <p>
-                Nenhum produto cadastrado.
-            </p>
+            ? lista.map(
 
-        `;
+                produto => `
 
-        return;
+                    <div class="produto-recente">
 
-    }
-
-
-    container.innerHTML =
-
-        lista.map(
-
-            produto => `
-
-                <div class="produto-recente">
-
-                    ${
-
-                        produto.imagem
+                        ${
+                            produto.imagem
 
                             ? `
 
                                 <img
-                                    src="${escaparHTML(
+                                    src="${esc(
                                         produto.imagem
                                     )}"
                                     alt=""
@@ -791,51 +1207,57 @@ function renderizarRecentes() {
                             `
 
                             : ""
+                        }
 
-                    }
+                        <div
+                            class="produto-recente-info"
+                        >
 
-                    <div
-                        class="produto-recente-info"
-                    >
+                            <strong>
 
-                        <strong>
+                                ${esc(
+                                    produto.nome
+                                )}
 
-                            ${escaparHTML(
-                                produto.nome
+                            </strong>
+
+                            <span>
+
+                                ${esc(
+                                    produto.categoria ||
+                                    ""
+                                )}
+
+                            </span>
+
+                        </div>
+
+                        <b>
+
+                            ${dinheiro(
+                                produto.preco
                             )}
 
-                        </strong>
-
-                        <span>
-
-                            ${escaparHTML(
-                                produto.categoria
-                            )}
-
-                        </span>
+                        </b>
 
                     </div>
 
-                    <b>
+                `
 
-                        ${dinheiro(
-                            produto.preco
-                        )}
+            ).join("")
 
-                    </b>
+            : `
 
-                </div>
+                <p>
+                    Nenhum produto cadastrado.
+                </p>
 
-            `
-
-        ).join("");
+            `;
 
 }
 
 
-/* =====================================================
-   PRODUTOS
-===================================================== */
+/* PRODUTOS */
 
 function renderizarProdutos() {
 
@@ -854,32 +1276,34 @@ function renderizarProdutos() {
 
         (
             $("#buscar-produto")
-                ?.value || ""
+                ?.value ||
+            ""
         )
-
-        .trim()
 
         .toLowerCase();
 
 
     const lista =
 
-        estado.produtos.filter(
+        estado.produtos
 
-            produto => {
+        .filter(
 
-                const texto =
+            produto =>
 
-                    `${produto.nome || ""} ${produto.categoria || ""}`
+                `${
+                    produto.nome ||
+                    ""
+                } ${
+                    produto.categoria ||
+                    ""
+                }`
 
-                    .toLowerCase();
+                .toLowerCase()
 
-
-                return texto.includes(
+                .includes(
                     busca
-                );
-
-            }
+                )
 
         );
 
@@ -887,37 +1311,18 @@ function renderizarProdutos() {
     $("#contador-produtos")
         .textContent =
 
-        lista.length === 1
-
-            ? "1 produto"
-
-            : `${lista.length} produtos`;
-
-
-    if (!lista.length) {
-
-        tabela.innerHTML = `
-
-            <tr>
-
-                <td colspan="6">
-
-                    Nenhum produto cadastrado.
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-
-    }
+        `${lista.length} produto${
+            lista.length === 1
+                ? ""
+                : "s"
+        }`;
 
 
     tabela.innerHTML =
 
-        lista.map(
+        lista.length
+
+        ? lista.map(
 
             produto => `
 
@@ -926,44 +1331,58 @@ function renderizarProdutos() {
                     <td>
 
                         <strong>
-                            ${escaparHTML(
+
+                            ${esc(
                                 produto.nome
                             )}
+
                         </strong>
 
                         <small>
-                            ${escaparHTML(
-                                produto.prazo || ""
+
+                            ${esc(
+                                produto.prazo ||
+                                ""
                             )}
+
                         </small>
 
                     </td>
 
                     <td>
-                        ${escaparHTML(
-                            produto.categoria
+
+                        ${esc(
+                            produto.categoria ||
+                            ""
                         )}
+
                     </td>
 
                     <td>
+
                         ${dinheiro(
                             produto.preco
                         )}
+
                     </td>
 
                     <td>
+
                         ${numero(
                             produto.estoque
                         )}
+
                     </td>
 
                     <td>
 
-                        <span class="${
-                            produto.disponivel !== false
-                                ? "visivel"
-                                : "oculto"
-                        }">
+                        <span
+                            class="${
+                                produto.disponivel !== false
+                                    ? "visivel"
+                                    : "oculto"
+                            }"
+                        >
 
                             ${
                                 produto.disponivel !== false
@@ -978,23 +1397,25 @@ function renderizarProdutos() {
                     <td>
 
                         <button
-                            type="button"
                             class="botao-pequeno"
-                            data-produto-editar="${escaparHTML(
+                            data-produto-editar="${esc(
                                 produto.id
                             )}"
                         >
+
                             Editar
+
                         </button>
 
                         <button
-                            type="button"
                             class="botao-pequeno botao-excluir"
-                            data-produto-excluir="${escaparHTML(
+                            data-produto-excluir="${esc(
                                 produto.id
                             )}"
                         >
+
                             Excluir
+
                         </button>
 
                     </td>
@@ -1003,7 +1424,19 @@ function renderizarProdutos() {
 
             `
 
-        ).join("");
+        ).join("")
+
+        : `
+
+            <tr>
+
+                <td colspan="6">
+                    Nenhum produto cadastrado.
+                </td>
+
+            </tr>
+
+        `;
 
 }
 
@@ -1021,25 +1454,37 @@ function abrirNovoProduto() {
     form.reset();
 
 
-    form.elements.estoque.value =
+    form.elements
+        .estoque
+        .value =
         0;
 
 
-    form.elements.prazo.value =
+    form.elements
+        .prazo
+        .value =
         "Produção sob encomenda";
 
 
-    form.elements.disponivel.checked =
+    form.elements
+        .disponivel
+        .checked =
         true;
 
 
-    form.elements.imagem.value =
+    form.elements
+        .imagem
+        .value =
         "";
 
 
-    form.elements.imagem.dispatchEvent(
-        new Event("change")
-    );
+    form.elements
+        .imagem
+        .dispatchEvent(
+            new Event(
+                "change"
+            )
+        );
 
 
     $("#titulo-modal-produto")
@@ -1053,16 +1498,27 @@ function abrirNovoProduto() {
 }
 
 
-function editarProduto(id) {
+function editarProduto(
+    id
+) {
 
     const produto =
 
-        estado.produtos.find(
+        estado.produtos
+
+        .find(
 
             item =>
 
-                String(item.id) ===
-                String(id)
+                String(
+                    item.id
+                )
+
+                ===
+
+                String(
+                    id
+                )
 
         );
 
@@ -1078,23 +1534,19 @@ function editarProduto(id) {
         produto.id;
 
 
-    const form =
-        $("#form-produto");
-
-
-    form.reset();
-
-
     const campos =
-        form.elements;
+        $("#form-produto")
+        .elements;
 
 
     campos.nome.value =
-        produto.nome || "";
+        produto.nome ||
+        "";
 
 
     campos.categoria.value =
-        produto.categoria || "";
+        produto.categoria ||
+        "";
 
 
     campos.preco.value =
@@ -1110,28 +1562,36 @@ function editarProduto(id) {
 
 
     campos.prazo.value =
-        produto.prazo || "";
+        produto.prazo ||
+        "";
 
 
     campos.imagem.value =
-        produto.imagem || "";
+        produto.imagem ||
+        "";
 
 
     campos.descricao.value =
-        produto.descricao || "";
+        produto.descricao ||
+        "";
 
 
     campos.disponivel.checked =
-        produto.disponivel !== false;
+        produto.disponivel !==
+        false;
 
 
     campos.destaque.checked =
-        produto.destaque === true;
+        produto.destaque ===
+        true;
 
 
-    campos.imagem.dispatchEvent(
-        new Event("change")
-    );
+    campos.imagem
+        .dispatchEvent(
+            new Event(
+                "change"
+            )
+        );
 
 
     $("#titulo-modal-produto")
@@ -1152,51 +1612,24 @@ async function salvarProduto(
     evento.preventDefault();
 
 
-    const form =
-        $("#form-produto");
-
-
     const campos =
-        form.elements;
-
-
-    const nome =
-        campos.nome.value.trim();
-
-
-    const categoria =
-        campos.categoria
-            .value
-            .trim();
-
-
-    if (
-
-        !nome ||
-        !categoria
-
-    ) {
-
-        avisar(
-
-            "Informe nome e categoria.",
-
-            true
-
-        );
-
-        return;
-
-    }
+        evento.currentTarget
+        .elements;
 
 
     const anterior =
 
-        estado.produtos.find(
+        estado.produtos
+
+        .find(
 
             item =>
 
-                String(item.id) ===
+                String(
+                    item.id
+                )
+
+                ===
 
                 String(
                     estado.produtoEditando
@@ -1207,16 +1640,27 @@ async function salvarProduto(
 
     const produto = {
 
-        ...(anterior || {}),
+        ...(
+            anterior ||
+            {}
+        ),
 
         id:
 
             anterior?.id ||
             criarID(),
 
-        nome,
+        nome:
 
-        categoria,
+            campos.nome
+                .value
+                .trim(),
+
+        categoria:
+
+            campos.categoria
+                .value
+                .trim(),
 
         preco:
 
@@ -1233,7 +1677,8 @@ async function salvarProduto(
                 Math.trunc(
 
                     numero(
-                        campos.estoque.value
+                        campos.estoque
+                            .value
                     )
 
                 )
@@ -1274,36 +1719,60 @@ async function salvarProduto(
     };
 
 
-    const novosProdutos =
+    if (
+
+        !produto.nome ||
+        !produto.categoria
+
+    ) {
+
+        avisar(
+
+            "Informe nome e categoria.",
+
+            true
+
+        );
+
+        return;
+
+    }
+
+
+    const lista =
 
         anterior
 
-            ? estado.produtos.map(
+        ? estado.produtos.map(
 
-                item =>
+            item =>
 
-                    String(item.id) ===
-                    String(anterior.id)
+                String(
+                    item.id
+                )
 
-                        ? produto
+                ===
 
-                        : item
+                String(
+                    anterior.id
+                )
 
-            )
+                ? produto
 
-            : [
+                : item
 
-                ...estado.produtos,
+        )
 
-                produto
-
-            ];
+        : [
+            ...estado.produtos,
+            produto
+        ];
 
 
     try {
 
         await salvarCatalogo(
-            novosProdutos
+            lista
         );
 
 
@@ -1320,14 +1789,11 @@ async function salvarProduto(
         );
 
 
-    } catch (erro) {
-
-        console.error(erro);
-
+    } catch (
+        erro
+    ) {
 
         avisar(
-
-            "Erro ao salvar produto: " +
 
             erro.message,
 
@@ -1340,33 +1806,37 @@ async function salvarProduto(
 }
 
 
-async function excluirProduto(id) {
+async function excluirProduto(
+    id
+) {
 
     const produto =
 
-        estado.produtos.find(
+        estado.produtos
+
+        .find(
 
             item =>
 
-                String(item.id) ===
-                String(id)
+                String(
+                    item.id
+                )
+
+                ===
+
+                String(
+                    id
+                )
 
         );
 
 
-    if (!produto) {
-
-        return;
-
-    }
-
-
     if (
 
+        !produto ||
+
         !confirm(
-
             `Excluir "${produto.nome}"?`
-
         )
 
     ) {
@@ -1380,12 +1850,21 @@ async function excluirProduto(id) {
 
         await salvarCatalogo(
 
-            estado.produtos.filter(
+            estado.produtos
+
+            .filter(
 
                 item =>
 
-                    String(item.id) !==
-                    String(id)
+                    String(
+                        item.id
+                    )
+
+                    !==
+
+                    String(
+                        id
+                    )
 
             )
 
@@ -1397,7 +1876,9 @@ async function excluirProduto(id) {
         );
 
 
-    } catch (erro) {
+    } catch (
+        erro
+    ) {
 
         avisar(
 
@@ -1412,9 +1893,7 @@ async function excluirProduto(id) {
 }
 
 
-/* =====================================================
-   PEDIDOS
-===================================================== */
+/* PEDIDOS */
 
 function renderizarPedidos() {
 
@@ -1429,26 +1908,13 @@ function renderizarPedidos() {
     }
 
 
-    if (!estado.pedidos.length) {
-
-        tabela.innerHTML = `
-
-            <tr>
-                <td colspan="6">
-                    Nenhum pedido registrado.
-                </td>
-            </tr>
-
-        `;
-
-        return;
-
-    }
-
-
     tabela.innerHTML =
 
-        [...estado.pedidos]
+        estado.pedidos.length
+
+        ? [
+            ...estado.pedidos
+        ]
 
         .reverse()
 
@@ -1461,21 +1927,26 @@ function renderizarPedidos() {
                     <td>
 
                         <strong>
-                            ${escaparHTML(
+
+                            ${esc(
                                 pedido.cliente
                             )}
+
                         </strong>
 
                         <small>
-                            ${escaparHTML(
-                                pedido.contato || ""
+
+                            ${esc(
+                                pedido.contato ||
+                                ""
                             )}
+
                         </small>
 
                     </td>
 
                     <td>
-                        ${escaparHTML(
+                        ${esc(
                             pedido.itens
                         )}
                     </td>
@@ -1487,7 +1958,7 @@ function renderizarPedidos() {
                     </td>
 
                     <td>
-                        ${escaparHTML(
+                        ${esc(
                             pedido.status
                         )}
                     </td>
@@ -1501,9 +1972,8 @@ function renderizarPedidos() {
                     <td>
 
                         <button
-                            type="button"
                             class="botao-pequeno"
-                            data-pedido-editar="${escaparHTML(
+                            data-pedido-editar="${esc(
                                 pedido.id
                             )}"
                         >
@@ -1511,9 +1981,8 @@ function renderizarPedidos() {
                         </button>
 
                         <button
-                            type="button"
                             class="botao-pequeno botao-excluir"
-                            data-pedido-excluir="${escaparHTML(
+                            data-pedido-excluir="${esc(
                                 pedido.id
                             )}"
                         >
@@ -1526,7 +1995,17 @@ function renderizarPedidos() {
 
             `
 
-        ).join("");
+        ).join("")
+
+        : `
+
+            <tr>
+                <td colspan="6">
+                    Nenhum pedido registrado.
+                </td>
+            </tr>
+
+        `;
 
 }
 
@@ -1547,16 +2026,27 @@ function abrirNovoPedido() {
 }
 
 
-function editarPedido(id) {
+function editarPedido(
+    id
+) {
 
     const pedido =
 
-        estado.pedidos.find(
+        estado.pedidos
+
+        .find(
 
             item =>
 
-                String(item.id) ===
-                String(id)
+                String(
+                    item.id
+                )
+
+                ===
+
+                String(
+                    id
+                )
 
         );
 
@@ -1574,19 +2064,22 @@ function editarPedido(id) {
 
     const campos =
         $("#form-pedido")
-            .elements;
+        .elements;
 
 
     campos.cliente.value =
-        pedido.cliente || "";
+        pedido.cliente ||
+        "";
 
 
     campos.contato.value =
-        pedido.contato || "";
+        pedido.contato ||
+        "";
 
 
     campos.itens.value =
-        pedido.itens || "";
+        pedido.itens ||
+        "";
 
 
     campos.valor.value =
@@ -1596,7 +2089,8 @@ function editarPedido(id) {
 
 
     campos.status.value =
-        pedido.status || "Novo";
+        pedido.status ||
+        "Novo";
 
 
     $("#modal-pedido")
@@ -1614,16 +2108,22 @@ function salvarPedido(
 
     const campos =
         evento.currentTarget
-            .elements;
+        .elements;
 
 
     const anterior =
 
-        estado.pedidos.find(
+        estado.pedidos
+
+        .find(
 
             item =>
 
-                String(item.id) ===
+                String(
+                    item.id
+                )
+
+                ===
 
                 String(
                     estado.pedidoEditando
@@ -1634,7 +2134,10 @@ function salvarPedido(
 
     const pedido = {
 
-        ...(anterior || {}),
+        ...(
+            anterior ||
+            {}
+        ),
 
         id:
 
@@ -1700,30 +2203,34 @@ function salvarPedido(
     }
 
 
-    if (anterior) {
+    estado.pedidos =
 
-        estado.pedidos =
+        anterior
 
-            estado.pedidos.map(
+        ? estado.pedidos.map(
 
-                item =>
+            item =>
 
-                    String(item.id) ===
-                    String(anterior.id)
+                String(
+                    item.id
+                )
 
-                        ? pedido
+                ===
 
-                        : item
+                String(
+                    anterior.id
+                )
 
-            );
+                ? pedido
 
-    } else {
+                : item
 
-        estado.pedidos.push(
+        )
+
+        : [
+            ...estado.pedidos,
             pedido
-        );
-
-    }
+        ];
 
 
     salvarPedidosLocal();
@@ -1744,7 +2251,9 @@ function salvarPedido(
 }
 
 
-function excluirPedido(id) {
+function excluirPedido(
+    id
+) {
 
     if (
 
@@ -1761,12 +2270,21 @@ function excluirPedido(id) {
 
     estado.pedidos =
 
-        estado.pedidos.filter(
+        estado.pedidos
+
+        .filter(
 
             item =>
 
-                String(item.id) !==
-                String(id)
+                String(
+                    item.id
+                )
+
+                !==
+
+                String(
+                    id
+                )
 
         );
 
@@ -1776,67 +2294,64 @@ function excluirPedido(id) {
 }
 
 
-/* =====================================================
-   CUSTOS
-===================================================== */
-
-function custosMesAtual() {
-
-    const hoje =
-        new Date();
-
-
-    return estado.custos.filter(
-
-        item => {
-
-            if (!item.data) {
-
-                return false;
-
-            }
-
-
-            const data =
-
-                new Date(
-
-                    item.data +
-                    "T12:00:00"
-
-                );
-
-
-            return (
-
-                data.getFullYear() ===
-                hoje.getFullYear()
-
-                &&
-
-                data.getMonth() ===
-                hoje.getMonth()
-
-            );
-
-        }
-
-    );
-
-}
-
+/* CUSTOS */
 
 function renderizarCustos() {
 
-    if (!$("#tabela-custos")) {
+    const tabela =
+        $("#tabela-custos");
+
+
+    if (!tabela) {
 
         return;
 
     }
 
 
+    const hoje =
+        new Date();
+
+
     const mes =
-        custosMesAtual();
+
+        estado.custos
+
+        .filter(
+
+            item => {
+
+                if (!item.data) {
+
+                    return false;
+
+                }
+
+
+                const data =
+                    new Date(
+
+                        item.data +
+                        "T12:00:00"
+
+                    );
+
+
+                return (
+
+                    data.getFullYear() ===
+                    hoje.getFullYear()
+
+                    &&
+
+                    data.getMonth() ===
+                    hoje.getMonth()
+
+                );
+
+            }
+
+        );
 
 
     const somar =
@@ -1844,48 +2359,66 @@ function renderizarCustos() {
 
             lista.reduce(
 
-                (total, item) =>
+                (
+                    total,
+                    item
+                ) =>
 
                     total +
-                    numero(item.valor),
+
+                    numero(
+                        item.valor
+                    ),
 
                 0
 
             );
 
 
-    const fixos =
-        mes.filter(
-            item =>
-                item.tipo === "Fixo"
-        );
-
-
-    const variaveis =
-        mes.filter(
-            item =>
-                item.tipo === "Variável"
-        );
-
-
     $("#custos-mes")
         .textContent =
         dinheiro(
-            somar(mes)
+            somar(
+                mes
+            )
         );
 
 
     $("#custos-fixos")
         .textContent =
         dinheiro(
-            somar(fixos)
+
+            somar(
+
+                mes.filter(
+
+                    item =>
+                        item.tipo ===
+                        "Fixo"
+
+                )
+
+            )
+
         );
 
 
     $("#custos-variaveis")
         .textContent =
         dinheiro(
-            somar(variaveis)
+
+            somar(
+
+                mes.filter(
+
+                    item =>
+                        item.tipo ===
+                        "Variável"
+
+                )
+
+            )
+
         );
 
 
@@ -1898,7 +2431,8 @@ function renderizarCustos() {
 
         (
             $("#buscar-custo")
-                ?.value || ""
+                ?.value ||
+            ""
         )
 
         .toLowerCase();
@@ -1913,7 +2447,9 @@ function renderizarCustos() {
 
     const lista =
 
-        [...estado.custos]
+        [
+            ...estado.custos
+        ]
 
         .filter(
 
@@ -1921,7 +2457,13 @@ function renderizarCustos() {
 
                 const texto =
 
-                    `${item.descricao || ""} ${item.categoria || ""}`
+                    `${
+                        item.descricao ||
+                        ""
+                    } ${
+                        item.categoria ||
+                        ""
+                    }`
 
                     .toLowerCase();
 
@@ -1935,9 +2477,13 @@ function renderizarCustos() {
                     &&
 
                     (
-                        filtro === "Todos" ||
+                        filtro ===
+                        "Todos"
 
-                        item.tipo === filtro
+                        ||
+
+                        item.tipo ===
+                        filtro
                     )
 
                 );
@@ -1948,57 +2494,48 @@ function renderizarCustos() {
 
         .sort(
 
-            (a, b) =>
+            (
+                a,
+                b
+            ) =>
 
-                String(b.data)
-                    .localeCompare(
-                        String(a.data)
+                String(
+                    b.data
+                )
+
+                .localeCompare(
+                    String(
+                        a.data
                     )
+                )
 
         );
 
 
-    if (!lista.length) {
+    tabela.innerHTML =
 
-        $("#tabela-custos")
-            .innerHTML = `
+        lista.length
 
-                <tr>
-                    <td colspan="6">
-                        Nenhum custo cadastrado.
-                    </td>
-                </tr>
-
-            `;
-
-        return;
-
-    }
-
-
-    $("#tabela-custos")
-        .innerHTML =
-
-        lista.map(
+        ? lista.map(
 
             item => `
 
                 <tr>
 
                     <td>
-                        ${escaparHTML(
+                        ${esc(
                             item.descricao
                         )}
                     </td>
 
                     <td>
-                        ${escaparHTML(
+                        ${esc(
                             item.categoria
                         )}
                     </td>
 
                     <td>
-                        ${escaparHTML(
+                        ${esc(
                             item.tipo
                         )}
                     </td>
@@ -2018,9 +2555,8 @@ function renderizarCustos() {
                     <td>
 
                         <button
-                            type="button"
                             class="botao-pequeno"
-                            data-custo-editar="${escaparHTML(
+                            data-custo-editar="${esc(
                                 item.id
                             )}"
                         >
@@ -2028,9 +2564,8 @@ function renderizarCustos() {
                         </button>
 
                         <button
-                            type="button"
                             class="botao-pequeno botao-excluir"
-                            data-custo-excluir="${escaparHTML(
+                            data-custo-excluir="${esc(
                                 item.id
                             )}"
                         >
@@ -2043,7 +2578,17 @@ function renderizarCustos() {
 
             `
 
-        ).join("");
+        ).join("")
+
+        : `
+
+            <tr>
+                <td colspan="6">
+                    Nenhum custo cadastrado.
+                </td>
+            </tr>
+
+        `;
 
 }
 
@@ -2061,7 +2606,9 @@ function abrirNovoCusto() {
     form.reset();
 
 
-    form.elements.data.value =
+    form.elements
+        .data
+        .value =
         dataHoje();
 
 
@@ -2076,16 +2623,27 @@ function abrirNovoCusto() {
 }
 
 
-function editarCusto(id) {
+function editarCusto(
+    id
+) {
 
     const custo =
 
-        estado.custos.find(
+        estado.custos
+
+        .find(
 
             item =>
 
-                String(item.id) ===
-                String(id)
+                String(
+                    item.id
+                )
+
+                ===
+
+                String(
+                    id
+                )
 
         );
 
@@ -2103,19 +2661,22 @@ function editarCusto(id) {
 
     const campos =
         $("#form-custo")
-            .elements;
+        .elements;
 
 
     campos.descricao.value =
-        custo.descricao || "";
+        custo.descricao ||
+        "";
 
 
     campos.categoria.value =
-        custo.categoria || "";
+        custo.categoria ||
+        "";
 
 
     campos.tipo.value =
-        custo.tipo || "Variável";
+        custo.tipo ||
+        "Variável";
 
 
     campos.valor.value =
@@ -2130,7 +2691,8 @@ function editarCusto(id) {
 
 
     campos.observacoes.value =
-        custo.observacoes || "";
+        custo.observacoes ||
+        "";
 
 
     $("#titulo-modal-custo")
@@ -2153,16 +2715,22 @@ function salvarCusto(
 
     const campos =
         evento.currentTarget
-            .elements;
+        .elements;
 
 
     const anterior =
 
-        estado.custos.find(
+        estado.custos
+
+        .find(
 
             item =>
 
-                String(item.id) ===
+                String(
+                    item.id
+                )
+
+                ===
 
                 String(
                     estado.custoEditando
@@ -2173,7 +2741,10 @@ function salvarCusto(
 
     const custo = {
 
-        ...(anterior || {}),
+        ...(
+            anterior ||
+            {}
+        ),
 
         id:
 
@@ -2239,30 +2810,34 @@ function salvarCusto(
     }
 
 
-    if (anterior) {
+    estado.custos =
 
-        estado.custos =
+        anterior
 
-            estado.custos.map(
+        ? estado.custos.map(
 
-                item =>
+            item =>
 
-                    String(item.id) ===
-                    String(anterior.id)
+                String(
+                    item.id
+                )
 
-                        ? custo
+                ===
 
-                        : item
+                String(
+                    anterior.id
+                )
 
-            );
+                ? custo
 
-    } else {
+                : item
 
-        estado.custos.push(
+        )
+
+        : [
+            ...estado.custos,
             custo
-        );
-
-    }
+        ];
 
 
     salvarCustosLocal();
@@ -2283,7 +2858,9 @@ function salvarCusto(
 }
 
 
-function excluirCusto(id) {
+function excluirCusto(
+    id
+) {
 
     if (
 
@@ -2300,12 +2877,21 @@ function excluirCusto(id) {
 
     estado.custos =
 
-        estado.custos.filter(
+        estado.custos
+
+        .filter(
 
             item =>
 
-                String(item.id) !==
-                String(id)
+                String(
+                    item.id
+                )
+
+                !==
+
+                String(
+                    id
+                )
 
         );
 
@@ -2315,59 +2901,458 @@ function excluirCusto(id) {
 }
 
 
-/* =====================================================
-   FILAMENTOS
-===================================================== */
+/* FILAMENTOS */
 
 function custoGrama(
-    item
+    filamento
 ) {
 
     const peso =
         numero(
-            item.pesoOriginal
+            filamento.pesoOriginal
         );
 
 
-    if (peso <= 0) {
+    return peso > 0
 
-        return 0;
+        ? numero(
+            filamento.valorPago
+        ) / peso
 
-    }
+        : 0;
+
+}
 
 
-    return (
+function proximoCodigoFilamento() {
 
-        numero(
-            item.valorPago
+    const numeros =
+
+        estado.filamentos
+
+        .map(
+
+            filamento =>
+                parseInt(
+                    filamento.codigo,
+                    10
+                )
+
         )
 
-        /
+        .filter(
+            Number.isFinite
+        );
 
-        peso
 
+    return String(
+
+        (
+            numeros.length
+
+            ? Math.max(
+                ...numeros
+            )
+
+            : 0
+        )
+
+        + 1
+
+    )
+
+    .padStart(
+        3,
+        "0"
     );
 
 }
 
 
-function filamentoBaixo(
-    item
-) {
+function renderizarFilamentos() {
 
-    return (
+    const tabela =
+        $("#tabela-filamentos");
 
-        numero(
-            item.pesoRestante
+
+    if (!tabela) {
+
+        return;
+
+    }
+
+
+    const peso =
+
+        estado.filamentos
+
+        .reduce(
+
+            (
+                total,
+                filamento
+            ) =>
+
+                total +
+
+                numero(
+                    filamento.pesoRestante
+                ),
+
+            0
+
+        );
+
+
+    const valor =
+
+        estado.filamentos
+
+        .reduce(
+
+            (
+                total,
+                filamento
+            ) =>
+
+                total +
+
+                (
+                    numero(
+                        filamento.pesoRestante
+                    )
+
+                    *
+
+                    custoGrama(
+                        filamento
+                    )
+                ),
+
+            0
+
+        );
+
+
+    $("#total-filamentos")
+        .textContent =
+        estado.filamentos.length;
+
+
+    $("#peso-filamentos")
+        .textContent =
+
+        (
+            peso /
+            1000
         )
 
-        <=
+        .toLocaleString(
 
-        numero(
-            item.limiteBaixo
+            "pt-BR",
+
+            {
+                maximumFractionDigits:
+                    2
+            }
+
         )
 
-    );
+        +
+
+        " kg";
+
+
+    $("#valor-filamentos")
+        .textContent =
+        dinheiro(
+            valor
+        );
+
+
+    $("#filamentos-baixos")
+        .textContent =
+
+        estado.filamentos
+
+        .filter(
+
+            filamento =>
+
+                numero(
+                    filamento.pesoRestante
+                )
+
+                <=
+
+                numero(
+                    filamento.limiteBaixo
+                )
+
+        )
+
+        .length;
+
+
+    const busca =
+
+        (
+            $("#buscar-filamento")
+                ?.value ||
+            ""
+        )
+
+        .toLowerCase();
+
+
+    const filtro =
+
+        $("#filtro-material")
+            ?.value ||
+        "Todos";
+
+
+    atualizarFiltroMateriais();
+
+
+    const lista =
+
+        estado.filamentos
+
+        .filter(
+
+            filamento =>
+
+                `${
+                    filamento.codigo ||
+                    ""
+                } ${
+                    filamento.marca ||
+                    ""
+                } ${
+                    filamento.material ||
+                    ""
+                } ${
+                    filamento.cor ||
+                    ""
+                }`
+
+                .toLowerCase()
+
+                .includes(
+                    busca
+                )
+
+                &&
+
+                (
+                    filtro ===
+                    "Todos"
+
+                    ||
+
+                    filamento.material ===
+                    filtro
+                )
+
+        );
+
+
+    tabela.innerHTML =
+
+        lista.length
+
+        ? lista.map(
+
+            filamento => {
+
+                const consumido =
+
+                    Math.max(
+
+                        0,
+
+                        numero(
+                            filamento.pesoOriginal
+                        )
+
+                        -
+
+                        numero(
+                            filamento.pesoRestante
+                        )
+
+                    );
+
+
+                const baixo =
+
+                    numero(
+                        filamento.pesoRestante
+                    )
+
+                    <=
+
+                    numero(
+                        filamento.limiteBaixo
+                    );
+
+
+                return `
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                ${esc(
+                                    filamento.codigo
+                                )}
+                            </strong>
+
+                        </td>
+
+                        <td>
+
+                            <strong>
+
+                                ${esc(
+                                    filamento.marca
+                                )}
+
+                            </strong>
+
+                            <small>
+
+                                ${esc(
+                                    filamento.material
+                                )}
+
+                                •
+
+                                ${
+                                    numero(
+                                        filamento.diametro
+                                    ) ||
+                                    1.75
+                                }
+
+                                mm
+
+                            </small>
+
+                        </td>
+
+                        <td>
+
+                            ${esc(
+                                filamento.cor
+                            )}
+
+                        </td>
+
+                        <td>
+
+                            ${
+                                numero(
+                                    filamento.pesoRestante
+                                )
+                            }
+
+                            g
+
+                        </td>
+
+                        <td>
+
+                            ${
+                                consumido.toFixed(
+                                    1
+                                )
+                            }
+
+                            g
+
+                        </td>
+
+                        <td>
+
+                            ${dinheiro(
+                                custoGrama(
+                                    filamento
+                                )
+                            )}
+
+                        </td>
+
+                        <td>
+
+                            <span
+                                class="${
+                                    baixo
+                                        ? "estoque-baixo"
+                                        : "estoque-ok"
+                                }"
+                            >
+
+                                ${
+                                    baixo
+                                        ? "Baixo"
+                                        : "OK"
+                                }
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <button
+                                class="botao-pequeno"
+                                data-filamento-editar="${esc(
+                                    filamento.id
+                                )}"
+                            >
+
+                                Editar
+
+                            </button>
+
+                            <button
+                                class="botao-pequeno botao-excluir"
+                                data-filamento-excluir="${esc(
+                                    filamento.id
+                                )}"
+                            >
+
+                                Excluir
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        ).join("")
+
+        : `
+
+            <tr>
+
+                <td colspan="8">
+                    Nenhum filamento cadastrado.
+                </td>
+
+            </tr>
+
+        `;
+
+
+    preencherSelectsFilamentos();
 
 }
 
@@ -2391,22 +3376,20 @@ function atualizarFiltroMateriais() {
 
     const materiais =
 
-        Array.from(
-
-            new Set(
+        [
+            ...new Set(
 
                 estado.filamentos
 
-                    .map(
-                        item =>
-                            item.material
-                    )
+                .map(
+                    filamento =>
+                        filamento.material
+                )
 
-                    .filter(Boolean)
+                .filter(Boolean)
 
             )
-
-        )
+        ]
 
         .sort();
 
@@ -2423,13 +3406,11 @@ function atualizarFiltroMateriais() {
 
                 material => `
 
-                    <option
-                        value="${escaparHTML(
-                            material
-                        )}"
-                    >
+                    <option value="${esc(
+                        material
+                    )}">
 
-                        ${escaparHTML(
+                        ${esc(
                             material
                         )}
 
@@ -2460,339 +3441,6 @@ function atualizarFiltroMateriais() {
 }
 
 
-function renderizarFilamentos() {
-
-    if (!$("#tabela-filamentos")) {
-
-        return;
-
-    }
-
-
-    const pesoTotal =
-
-        estado.filamentos.reduce(
-
-            (total, item) =>
-
-                total +
-
-                numero(
-                    item.pesoRestante
-                ),
-
-            0
-
-        );
-
-
-    const valorEstoque =
-
-        estado.filamentos.reduce(
-
-            (total, item) =>
-
-                total +
-
-                (
-                    numero(
-                        item.pesoRestante
-                    )
-
-                    *
-
-                    custoGrama(item)
-
-                ),
-
-            0
-
-        );
-
-
-    $("#total-filamentos")
-        .textContent =
-        estado.filamentos.length;
-
-
-    $("#peso-filamentos")
-        .textContent =
-
-        (
-            pesoTotal /
-            1000
-        )
-
-        .toLocaleString(
-
-            "pt-BR",
-
-            {
-                maximumFractionDigits: 2
-            }
-
-        )
-
-        +
-
-        " kg";
-
-
-    $("#valor-filamentos")
-        .textContent =
-        dinheiro(
-            valorEstoque
-        );
-
-
-    $("#filamentos-baixos")
-        .textContent =
-
-        estado.filamentos
-            .filter(
-                filamentoBaixo
-            )
-            .length;
-
-
-    atualizarFiltroMateriais();
-
-
-    const busca =
-
-        (
-            $("#buscar-filamento")
-                ?.value || ""
-        )
-
-        .toLowerCase();
-
-
-    const filtro =
-
-        $("#filtro-material")
-            ?.value ||
-        "Todos";
-
-
-    const lista =
-
-        estado.filamentos.filter(
-
-            item => {
-
-                const texto =
-
-                    `${item.marca || ""} ${item.material || ""} ${item.cor || ""}`
-
-                    .toLowerCase();
-
-
-                return (
-
-                    texto.includes(
-                        busca
-                    )
-
-                    &&
-
-                    (
-                        filtro === "Todos" ||
-
-                        item.material === filtro
-                    )
-
-                );
-
-            }
-
-        );
-
-
-    if (!lista.length) {
-
-        $("#tabela-filamentos")
-            .innerHTML = `
-
-                <tr>
-                    <td colspan="7">
-                        Nenhum filamento cadastrado.
-                    </td>
-                </tr>
-
-            `;
-
-
-        renderizarSimulador();
-
-        return;
-
-    }
-
-
-    $("#tabela-filamentos")
-        .innerHTML =
-
-        lista.map(
-
-            item => {
-
-                const restante =
-                    numero(
-                        item.pesoRestante
-                    );
-
-
-                const original =
-
-                    Math.max(
-
-                        1,
-
-                        numero(
-                            item.pesoOriginal
-                        )
-
-                    );
-
-
-                const percentual =
-
-                    Math.max(
-
-                        0,
-
-                        Math.min(
-
-                            100,
-
-                            (
-                                restante /
-                                original
-                            ) * 100
-
-                        )
-
-                    );
-
-
-                return `
-
-                    <tr>
-
-                        <td>
-
-                            <strong>
-                                ${escaparHTML(
-                                    item.marca
-                                )}
-                            </strong>
-
-                            <small>
-                                ${numero(
-                                    item.diametro
-                                )}
-                                mm
-                            </small>
-
-                        </td>
-
-                        <td>
-                            ${escaparHTML(
-                                item.material
-                            )}
-                        </td>
-
-                        <td>
-                            ${escaparHTML(
-                                item.cor
-                            )}
-                        </td>
-
-                        <td>
-
-                            ${restante}
-                            g
-
-                            <div
-                                class="barra-estoque"
-                            >
-
-                                <span
-                                    style="
-                                        width:
-                                        ${percentual}%;
-                                    "
-                                ></span>
-
-                            </div>
-
-                        </td>
-
-                        <td>
-                            ${dinheiro(
-                                custoGrama(
-                                    item
-                                )
-                            )}
-                        </td>
-
-                        <td>
-
-                            <span class="${
-                                filamentoBaixo(item)
-                                    ? "estoque-baixo"
-                                    : "estoque-ok"
-                            }">
-
-                                ${
-                                    filamentoBaixo(item)
-                                        ? "Baixo"
-                                        : "OK"
-                                }
-
-                            </span>
-
-                        </td>
-
-                        <td>
-
-                            <button
-                                type="button"
-                                class="botao-pequeno"
-                                data-filamento-editar="${escaparHTML(
-                                    item.id
-                                )}"
-                            >
-                                Editar
-                            </button>
-
-                            <button
-                                type="button"
-                                class="botao-pequeno botao-excluir"
-                                data-filamento-excluir="${escaparHTML(
-                                    item.id
-                                )}"
-                            >
-                                Excluir
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-            }
-
-        ).join("");
-
-
-    renderizarSimulador();
-
-}
-
-
 function abrirNovoFilamento() {
 
     estado.filamentoEditando =
@@ -2806,19 +3454,33 @@ function abrirNovoFilamento() {
     form.reset();
 
 
-    form.elements.diametro.value =
+    form.elements
+        .codigo
+        .value =
+        proximoCodigoFilamento();
+
+
+    form.elements
+        .diametro
+        .value =
         1.75;
 
 
-    form.elements.pesoOriginal.value =
+    form.elements
+        .pesoOriginal
+        .value =
         1000;
 
 
-    form.elements.pesoRestante.value =
+    form.elements
+        .pesoRestante
+        .value =
         1000;
 
 
-    form.elements.limiteBaixo.value =
+    form.elements
+        .limiteBaixo
+        .value =
         200;
 
 
@@ -2833,26 +3495,32 @@ function abrirNovoFilamento() {
 }
 
 
-function editarFilamento(id) {
+function editarFilamento(
+    id
+) {
 
-    const item =
+    const filamento =
 
-        estado.filamentos.find(
+        estado.filamentos
 
-            filamento =>
+        .find(
+
+            item =>
 
                 String(
-                    filamento.id
+                    item.id
                 )
 
                 ===
 
-                String(id)
+                String(
+                    id
+                )
 
         );
 
 
-    if (!item) {
+    if (!filamento) {
 
         return;
 
@@ -2860,58 +3528,68 @@ function editarFilamento(id) {
 
 
     estado.filamentoEditando =
-        item.id;
+        filamento.id;
 
 
     const campos =
         $("#form-filamento")
-            .elements;
+        .elements;
+
+
+    campos.codigo.value =
+        filamento.codigo ||
+        "";
 
 
     campos.marca.value =
-        item.marca || "";
+        filamento.marca ||
+        "";
 
 
     campos.material.value =
-        item.material || "";
+        filamento.material ||
+        "";
 
 
     campos.cor.value =
-        item.cor || "";
+        filamento.cor ||
+        "";
 
 
     campos.diametro.value =
         numero(
-            item.diametro
-        ) || 1.75;
+            filamento.diametro
+        ) ||
+        1.75;
 
 
     campos.pesoOriginal.value =
         numero(
-            item.pesoOriginal
+            filamento.pesoOriginal
         );
 
 
     campos.pesoRestante.value =
         numero(
-            item.pesoRestante
+            filamento.pesoRestante
         );
 
 
     campos.valorPago.value =
         numero(
-            item.valorPago
+            filamento.valorPago
         );
 
 
     campos.limiteBaixo.value =
         numero(
-            item.limiteBaixo
+            filamento.limiteBaixo
         );
 
 
     campos.observacoes.value =
-        item.observacoes || "";
+        filamento.observacoes ||
+        "";
 
 
     $("#titulo-modal-filamento")
@@ -2934,16 +3612,22 @@ function salvarFilamento(
 
     const campos =
         evento.currentTarget
-            .elements;
+        .elements;
 
 
     const anterior =
 
-        estado.filamentos.find(
+        estado.filamentos
+
+        .find(
 
             item =>
 
-                String(item.id) ===
+                String(
+                    item.id
+                )
+
+                ===
 
                 String(
                     estado.filamentoEditando
@@ -2952,14 +3636,86 @@ function salvarFilamento(
         );
 
 
+    const codigo =
+        campos.codigo
+            .value
+            .trim();
+
+
+    if (!codigo) {
+
+        avisar(
+
+            "Informe o código do filamento.",
+
+            true
+
+        );
+
+        return;
+
+    }
+
+
+    const codigoDuplicado =
+
+        estado.filamentos
+
+        .some(
+
+            filamento =>
+
+                String(
+                    filamento.codigo
+                )
+
+                ===
+
+                codigo
+
+                &&
+
+                String(
+                    filamento.id
+                )
+
+                !==
+
+                String(
+                    anterior?.id
+                )
+
+        );
+
+
+    if (codigoDuplicado) {
+
+        avisar(
+
+            "Já existe um filamento com esse código.",
+
+            true
+
+        );
+
+        return;
+
+    }
+
+
     const filamento = {
 
-        ...(anterior || {}),
+        ...(
+            anterior ||
+            {}
+        ),
 
         id:
 
             anterior?.id ||
             criarID(),
+
+        codigo,
 
         marca:
 
@@ -3044,9 +3800,18 @@ function salvarFilamento(
 
     if (
 
-        filamento.pesoOriginal <= 0 ||
+        filamento.pesoOriginal <=
+        0
 
-        filamento.pesoRestante < 0
+        ||
+
+        filamento.pesoRestante <
+        0
+
+        ||
+
+        filamento.pesoRestante >
+        filamento.pesoOriginal
 
     ) {
 
@@ -3063,53 +3828,34 @@ function salvarFilamento(
     }
 
 
-    if (
+    estado.filamentos =
 
-        filamento.pesoRestante >
+        anterior
 
-        filamento.pesoOriginal
+        ? estado.filamentos.map(
 
-    ) {
+            item =>
 
-        avisar(
+                String(
+                    item.id
+                )
 
-            "O peso restante não pode " +
+                ===
 
-            "ser maior que o peso original.",
+                String(
+                    anterior.id
+                )
 
-            true
+                ? filamento
 
-        );
+                : item
 
-        return;
+        )
 
-    }
-
-
-    if (anterior) {
-
-        estado.filamentos =
-
-            estado.filamentos.map(
-
-                item =>
-
-                    String(item.id) ===
-                    String(anterior.id)
-
-                        ? filamento
-
-                        : item
-
-            );
-
-    } else {
-
-        estado.filamentos.push(
+        : [
+            ...estado.filamentos,
             filamento
-        );
-
-    }
+        ];
 
 
     salvarFilamentosLocal();
@@ -3130,7 +3876,9 @@ function salvarFilamento(
 }
 
 
-function excluirFilamento(id) {
+function excluirFilamento(
+    id
+) {
 
     if (
 
@@ -3147,12 +3895,21 @@ function excluirFilamento(id) {
 
     estado.filamentos =
 
-        estado.filamentos.filter(
+        estado.filamentos
+
+        .filter(
 
             item =>
 
-                String(item.id) !==
-                String(id)
+                String(
+                    item.id
+                )
+
+                !==
+
+                String(
+                    id
+                )
 
         );
 
@@ -3162,14 +3919,12 @@ function excluirFilamento(id) {
 }
 
 
-/* =====================================================
-   SIMULADOR
-===================================================== */
+/* PRECIFICAÇÃO */
 
-function renderizarSimulador() {
+function preencherSelectProdutosPrec() {
 
     const select =
-        $("#sim-filamento");
+        $("#prec-produto");
 
 
     if (!select) {
@@ -3186,35 +3941,27 @@ function renderizarSimulador() {
     select.innerHTML = `
 
         <option value="">
-            Selecione
+            Sem produto vinculado
         </option>
 
         ${
 
-            estado.filamentos.map(
+            estado.produtos.map(
 
-                item => `
+                produto => `
 
-                    <option
-                        value="${escaparHTML(
-                            item.id
-                        )}"
-                    >
+                    <option value="${esc(
+                        produto.id
+                    )}">
 
-                        ${escaparHTML(
-                            item.material
+                        ${esc(
+                            produto.nome
                         )}
 
-                        -
+                        —
 
-                        ${escaparHTML(
-                            item.cor
-                        )}
-
-                        -
-
-                        ${escaparHTML(
-                            item.marca
+                        ${dinheiro(
+                            produto.preco
                         )}
 
                     </option>
@@ -3230,12 +3977,21 @@ function renderizarSimulador() {
 
     if (
 
-        estado.filamentos.some(
+        estado.produtos
 
-            item =>
+        .some(
 
-                String(item.id) ===
-                String(atual)
+            produto =>
+
+                String(
+                    produto.id
+                )
+
+                ===
+
+                String(
+                    atual
+                )
 
         )
 
@@ -3246,91 +4002,1040 @@ function renderizarSimulador() {
 
     }
 
+}
 
-    calcularSimulador();
+
+function preencherSelectsFilamentos() {
+
+    for (
+
+        let indice = 1;
+
+        indice <= 4;
+
+        indice++
+
+    ) {
+
+        const select =
+            $(
+                "#prec-filamento-" +
+                indice
+            );
+
+
+        if (!select) {
+
+            continue;
+
+        }
+
+
+        const atual =
+            select.value;
+
+
+        const filamentosOrdenados =
+
+            estado.filamentos
+
+            .slice()
+
+            .sort(
+
+                (
+                    a,
+                    b
+                ) =>
+
+                    String(
+                        a.codigo
+                    )
+
+                    .localeCompare(
+                        String(
+                            b.codigo
+                        )
+                    )
+
+            );
+
+
+        select.innerHTML = `
+
+            <option value="">
+                Nenhum
+            </option>
+
+            ${
+
+                filamentosOrdenados
+
+                .map(
+
+                    filamento => `
+
+                        <option value="${esc(
+                            filamento.id
+                        )}">
+
+                            ${esc(
+                                filamento.codigo
+                            )}
+
+                            •
+
+                            ${esc(
+                                filamento.material
+                            )}
+
+                            •
+
+                            ${esc(
+                                filamento.cor
+                            )}
+
+                            •
+
+                            ${esc(
+                                filamento.marca
+                            )}
+
+                            •
+
+                            ${
+                                numero(
+                                    filamento.pesoRestante
+                                )
+                            }g
+
+                        </option>
+
+                    `
+
+                ).join("")
+
+            }
+
+        `;
+
+
+        if (
+
+            estado.filamentos
+
+            .some(
+
+                filamento =>
+
+                    String(
+                        filamento.id
+                    )
+
+                    ===
+
+                    String(
+                        atual
+                    )
+
+            )
+
+        ) {
+
+            select.value =
+                atual;
+
+        }
+
+    }
+
+
+    atualizarCustosLinhasFilamento();
 
 }
 
 
-function calcularSimulador() {
+function atualizarCustosLinhasFilamento() {
 
-    const id =
-        $("#sim-filamento")
-            ?.value;
+    for (
+
+        let indice = 1;
+
+        indice <= 4;
+
+        indice++
+
+    ) {
+
+        const id =
+            $(
+                "#prec-filamento-" +
+                indice
+            )?.value;
 
 
-    const filamento =
+        const gramas =
+            numero(
 
-        estado.filamentos.find(
+                $(
+                    "#prec-gramas-" +
+                    indice
+                )?.value
 
-            item =>
+            );
 
-                String(item.id) ===
-                String(id)
+
+        const filamento =
+
+            estado.filamentos
+
+            .find(
+
+                item =>
+
+                    String(
+                        item.id
+                    )
+
+                    ===
+
+                    String(
+                        id
+                    )
+
+            );
+
+
+        const elemento =
+            $(
+                "#prec-filamento-custo-" +
+                indice
+            );
+
+
+        if (!elemento) {
+
+            continue;
+
+        }
+
+
+        elemento.textContent =
+
+            filamento
+
+            ? `
+
+                ${dinheiro(
+                    custoGrama(
+                        filamento
+                    ) * gramas
+                )}
+
+                •
+
+                ${dinheiro(
+                    custoGrama(
+                        filamento
+                    )
+                )}/g
+
+                •
+
+                saldo ${
+                    numero(
+                        filamento.pesoRestante
+                    )
+                }g
+
+              `
+
+            : "—";
+
+    }
+
+}
+
+
+function carregarConfigNosCampos() {
+
+    const config =
+        estado.precConfig;
+
+
+    const mapa = {
+
+        "#cfg-energia":
+            "energiaKwh",
+
+        "#cfg-maoobra":
+            "maoObraHora",
+
+        "#cfg-perdas":
+            "perdasPct",
+
+        "#cfg-tributos":
+            "tributosPct",
+
+        "#cfg-outros-tributos":
+            "outrosTributosPct",
+
+        "#cfg-taxa-pagamento":
+            "taxaPagamentoPct",
+
+        "#cfg-taxa-fixa":
+            "taxaPagamentoFixa",
+
+        "#cfg-margem":
+            "margemPct",
+
+        "#cfg-impressora-valor":
+            "impressoraValor",
+
+        "#cfg-impressora-vida":
+            "impressoraVidaHoras"
+
+    };
+
+
+    Object.entries(
+        mapa
+    )
+
+    .forEach(
+
+        ([
+            seletor,
+            chave
+        ]) => {
+
+            if ($(seletor)) {
+
+                $(seletor)
+                    .value =
+                    numero(
+                        config[chave]
+                    );
+
+            }
+
+        }
+
+    );
+
+
+    const canais = {
+
+        direta:
+            "#cfg-canal-direta",
+
+        site:
+            "#cfg-canal-site",
+
+        mercado_livre:
+            "#cfg-canal-ml",
+
+        shopee:
+            "#cfg-canal-shopee",
+
+        consignacao:
+            "#cfg-canal-consignacao",
+
+        personalizado:
+            "#cfg-canal-personalizado"
+
+    };
+
+
+    Object.entries(
+        canais
+    )
+
+    .forEach(
+
+        ([
+            chave,
+            seletor
+        ]) => {
+
+            if ($(seletor)) {
+
+                $(seletor)
+                    .value =
+                    numero(
+                        config.canais[
+                            chave
+                        ]
+                    );
+
+            }
+
+        }
+
+    );
+
+
+    aplicarPadroesAoCalculo();
+
+}
+
+
+function lerConfigDosCampos() {
+
+    estado.precConfig = {
+
+        energiaKwh:
+
+            numero(
+                $("#cfg-energia")
+                    .value
+            ),
+
+        maoObraHora:
+
+            numero(
+                $("#cfg-maoobra")
+                    .value
+            ),
+
+        perdasPct:
+
+            numero(
+                $("#cfg-perdas")
+                    .value
+            ),
+
+        tributosPct:
+
+            numero(
+                $("#cfg-tributos")
+                    .value
+            ),
+
+        outrosTributosPct:
+
+            numero(
+                $("#cfg-outros-tributos")
+                    .value
+            ),
+
+        taxaPagamentoPct:
+
+            numero(
+                $("#cfg-taxa-pagamento")
+                    .value
+            ),
+
+        taxaPagamentoFixa:
+
+            numero(
+                $("#cfg-taxa-fixa")
+                    .value
+            ),
+
+        margemPct:
+
+            numero(
+                $("#cfg-margem")
+                    .value
+            ),
+
+        impressoraValor:
+
+            numero(
+                $("#cfg-impressora-valor")
+                    .value
+            ),
+
+        impressoraVidaHoras:
+
+            numero(
+                $("#cfg-impressora-vida")
+                    .value
+            ),
+
+        canais: {
+
+            direta:
+
+                numero(
+                    $("#cfg-canal-direta")
+                        .value
+                ),
+
+            site:
+
+                numero(
+                    $("#cfg-canal-site")
+                        .value
+                ),
+
+            mercado_livre:
+
+                numero(
+                    $("#cfg-canal-ml")
+                        .value
+                ),
+
+            shopee:
+
+                numero(
+                    $("#cfg-canal-shopee")
+                        .value
+                ),
+
+            consignacao:
+
+                numero(
+                    $("#cfg-canal-consignacao")
+                        .value
+                ),
+
+            personalizado:
+
+                numero(
+                    $("#cfg-canal-personalizado")
+                        .value
+                )
+
+        }
+
+    };
+
+
+    salvarPrecConfig();
+
+    aplicarPadroesAoCalculo();
+
+
+    avisar(
+        "Configurações de precificação salvas."
+    );
+
+}
+
+
+function aplicarPadroesAoCalculo() {
+
+    const config =
+        estado.precConfig;
+
+
+    const valores = {
+
+        "#prec-energia":
+            config.energiaKwh,
+
+        "#prec-maoobra-hora":
+            config.maoObraHora,
+
+        "#prec-perdas":
+            config.perdasPct,
+
+        "#prec-tributos":
+            config.tributosPct,
+
+        "#prec-outros-tributos":
+            config.outrosTributosPct,
+
+        "#prec-taxa-pagamento":
+            config.taxaPagamentoPct,
+
+        "#prec-taxa-fixa":
+            config.taxaPagamentoFixa,
+
+        "#prec-margem":
+            config.margemPct,
+
+        "#prec-impressora-valor":
+            config.impressoraValor,
+
+        "#prec-impressora-vida":
+            config.impressoraVidaHoras
+
+    };
+
+
+    Object.entries(
+        valores
+    )
+
+    .forEach(
+
+        ([
+            seletor,
+            valor
+        ]) => {
+
+            if ($(seletor)) {
+
+                $(seletor)
+                    .value =
+                    valor;
+
+            }
+
+        }
+
+    );
+
+
+    atualizarTaxaCanal();
+
+    calcularPrecificacao();
+
+}
+
+
+function atualizarTaxaCanal() {
+
+    const canal =
+        $("#prec-canal")
+            ?.value ||
+        "direta";
+
+
+    if ($("#prec-taxa-canal")) {
+
+        $("#prec-taxa-canal")
+            .value =
+
+            numero(
+
+                estado.precConfig
+                    .canais[
+                        canal
+                    ]
+
+            );
+
+    }
+
+
+    calcularPrecificacao();
+
+}
+
+
+/* ADICIONAIS */
+
+function renderizarAdicionais() {
+
+    const elemento =
+        $("#prec-adicionais-lista");
+
+
+    if (!elemento) {
+
+        return;
+
+    }
+
+
+    elemento.innerHTML =
+
+        estado.adicionais.length
+
+        ? estado.adicionais
+
+        .map(
+
+            adicional => `
+
+                <label class="adicional-item">
+
+                    <input
+                        type="checkbox"
+                        data-adicional-id="${esc(
+                            adicional.id
+                        )}"
+                    >
+
+                    <span>
+
+                        ${esc(
+                            adicional.nome
+                        )}
+
+                    </span>
+
+                    <strong>
+
+                        ${dinheiro(
+                            adicional.custo
+                        )}
+
+                    </strong>
+
+                    <button
+                        type="button"
+                        class="mini-x"
+                        data-adicional-excluir="${esc(
+                            adicional.id
+                        )}"
+                        aria-label="Excluir adicional"
+                    >
+                        ×
+                    </button>
+
+                </label>
+
+            `
+
+        ).join("")
+
+        : `
+
+            <p class="texto-fraco">
+                Nenhum adicional cadastrado.
+            </p>
+
+        `;
+
+}
+
+
+function adicionarAdicional() {
+
+    const nome =
+        $("#novo-adicional-nome")
+            .value
+            .trim();
+
+
+    const custo =
+        numero(
+            $("#novo-adicional-custo")
+                .value
+        );
+
+
+    if (!nome) {
+
+        avisar(
+
+            "Informe o nome do adicional.",
+
+            true
+
+        );
+
+        return;
+
+    }
+
+
+    estado.adicionais.push({
+
+        id:
+            criarID(),
+
+        nome,
+
+        custo
+
+    });
+
+
+    $("#novo-adicional-nome")
+        .value =
+        "";
+
+
+    $("#novo-adicional-custo")
+        .value =
+        "";
+
+
+    salvarAdicionais();
+
+}
+
+
+function excluirAdicional(
+    id
+) {
+
+    estado.adicionais =
+
+        estado.adicionais
+
+        .filter(
+
+            adicional =>
+
+                String(
+                    adicional.id
+                )
+
+                !==
+
+                String(
+                    id
+                )
 
         );
 
 
-    const gramas =
-        Math.max(
-            0,
-            numero(
-                $("#sim-gramas")
-                    ?.value
-            )
+    salvarAdicionais();
+
+}
+
+
+/* CÁLCULO */
+
+function arredondarComercial(
+    valor
+) {
+
+    if (
+
+        valor <=
+        0
+
+    ) {
+
+        return 0;
+
+    }
+
+
+    const base =
+        Math.floor(
+            valor
+        );
+
+
+    let candidato =
+        base +
+        0.90;
+
+
+    if (
+
+        candidato <
+        valor - 0.0000001
+
+    ) {
+
+        candidato =
+            base +
+            1.90;
+
+    }
+
+
+    return Math.round(
+        candidato *
+        100
+    ) / 100;
+
+}
+
+
+function coletarFilamentosPrec() {
+
+    const itens =
+        [];
+
+
+    for (
+
+        let indice = 1;
+
+        indice <= 4;
+
+        indice++
+
+    ) {
+
+        const id =
+            $(
+                "#prec-filamento-" +
+                indice
+            )?.value;
+
+
+        const gramas =
+
+            Math.max(
+
+                0,
+
+                numero(
+
+                    $(
+                        "#prec-gramas-" +
+                        indice
+                    )?.value
+
+                )
+
+            );
+
+
+        if (
+
+            id &&
+            gramas > 0
+
+        ) {
+
+            const filamento =
+
+                estado.filamentos
+
+                .find(
+
+                    item =>
+
+                        String(
+                            item.id
+                        )
+
+                        ===
+
+                        String(
+                            id
+                        )
+
+                );
+
+
+            if (filamento) {
+
+                itens.push({
+
+                    slot:
+                        indice,
+
+                    id:
+                        filamento.id,
+
+                    codigo:
+                        filamento.codigo,
+
+                    material:
+                        filamento.material,
+
+                    cor:
+                        filamento.cor,
+
+                    marca:
+                        filamento.marca,
+
+                    gramas,
+
+                    custoGrama:
+                        custoGrama(
+                            filamento
+                        ),
+
+                    custo:
+
+                        custoGrama(
+                            filamento
+                        )
+
+                        *
+
+                        gramas,
+
+                    saldo:
+
+                        numero(
+                            filamento.pesoRestante
+                        )
+
+                });
+
+            }
+
+        }
+
+    }
+
+
+    return itens;
+
+}
+
+
+function calcularPrecificacao() {
+
+    if (!$("#precificacao")) {
+
+        return null;
+
+    }
+
+
+    atualizarCustosLinhasFilamento();
+
+
+    const filamentos =
+        coletarFilamentosPrec();
+
+
+    const custoMaterial =
+
+        filamentos
+
+        .reduce(
+
+            (
+                total,
+                item
+            ) =>
+
+                total +
+                item.custo,
+
+            0
+
         );
 
 
     const horas =
+
         Math.max(
+
             0,
+
             numero(
-                $("#sim-horas")
+                $("#prec-horas")
                     ?.value
             )
+
         );
 
 
     const potencia =
+
         Math.max(
+
             0,
+
             numero(
-                $("#sim-potencia")
+                $("#prec-potencia")
                     ?.value
             )
+
         );
 
 
-    const tarifa =
+    const energiaKwh =
+
         Math.max(
+
             0,
+
             numero(
-                $("#sim-energia")
+                $("#prec-energia")
                     ?.value
             )
+
         );
-
-
-    const margem =
-        Math.max(
-            0,
-            numero(
-                $("#sim-margem")
-                    ?.value
-            )
-        );
-
-
-    const material =
-
-        filamento
-
-            ? gramas *
-                custoGrama(
-                    filamento
-                )
-
-            : 0;
 
 
     const energia =
@@ -3346,98 +5051,1445 @@ function calcularSimulador() {
 
         *
 
-        tarifa;
+        energiaKwh;
 
 
-    const direto =
-        material +
-        energia;
+    const impressoraValor =
 
+        Math.max(
 
-    const calculado =
+            0,
 
-        direto *
+            numero(
+                $("#prec-impressora-valor")
+                    ?.value
+            )
 
-        (
-            1 +
-            margem / 100
         );
 
 
-    $("#sim-custo-material")
-        .textContent =
-        dinheiro(material);
+    const impressoraVida =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-impressora-vida")
+                    ?.value
+            )
+
+        );
 
 
-    $("#sim-custo-energia")
-        .textContent =
-        dinheiro(energia);
+    const depreciacao =
+
+        impressoraVida > 0
+
+        ? (
+            impressoraValor /
+            impressoraVida
+        )
+
+        *
+
+        horas
+
+        : 0;
 
 
-    $("#sim-custo-direto")
-        .textContent =
-        dinheiro(direto);
+    const maoMinutos =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-maoobra-min")
+                    ?.value
+            )
+
+        );
 
 
-    $("#sim-preco-sugerido")
-        .textContent =
-        dinheiro(calculado);
+    const maoHora =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-maoobra-hora")
+                    ?.value
+            )
+
+        );
+
+
+    const maoObra =
+
+        (
+            maoMinutos /
+            60
+        )
+
+        *
+
+        maoHora;
+
+
+    const perdasPct =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-perdas")
+                    ?.value
+            )
+
+        );
+
+
+    const perdas =
+
+        (
+            custoMaterial +
+            energia +
+            depreciacao +
+            maoObra
+        )
+
+        *
+
+        (
+            perdasPct /
+            100
+        );
+
+
+    const adicionais =
+
+        estado.adicionais
+
+        .filter(
+
+            adicional => {
+
+                const checkbox =
+
+                    document.querySelector(
+
+                        `[data-adicional-id="${CSS.escape(
+                            String(
+                                adicional.id
+                            )
+                        )}"]`
+
+                    );
+
+
+                return checkbox
+                    ?.checked;
+
+            }
+
+        );
+
+
+    const custoAdicionais =
+
+        adicionais
+
+        .reduce(
+
+            (
+                total,
+                adicional
+            ) =>
+
+                total +
+
+                numero(
+                    adicional.custo
+                ),
+
+            0
+
+        );
+
+
+    const outrosCustos =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-outros-custos")
+                    ?.value
+            )
+
+        );
+
+
+    const custoBase =
+
+        custoMaterial +
+        energia +
+        depreciacao +
+        maoObra +
+        perdas +
+        custoAdicionais +
+        outrosCustos;
+
+
+    const tributos =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-tributos")
+                    ?.value
+            )
+
+        );
+
+
+    const outrosTributos =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-outros-tributos")
+                    ?.value
+            )
+
+        );
+
+
+    const pagamentoPct =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-taxa-pagamento")
+                    ?.value
+            )
+
+        );
+
+
+    const pagamentoFixa =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-taxa-fixa")
+                    ?.value
+            )
+
+        );
+
+
+    const canalPct =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-taxa-canal")
+                    ?.value
+            )
+
+        );
+
+
+    const margem =
+
+        Math.max(
+
+            0,
+
+            numero(
+                $("#prec-margem")
+                    ?.value
+            )
+
+        );
+
+
+    const taxasSemMargem =
+
+        (
+            tributos +
+            outrosTributos +
+            pagamentoPct +
+            canalPct
+        )
+
+        /
+        100;
+
+
+    const totalComMargem =
+
+        (
+            tributos +
+            outrosTributos +
+            pagamentoPct +
+            canalPct +
+            margem
+        )
+
+        /
+        100;
+
+
+    let precoMinimo =
+        0;
+
+
+    let precoBruto =
+        0;
+
+
+    let erro =
+        "";
+
+
+    if (
+
+        taxasSemMargem >=
+        0.99
+
+        ||
+
+        totalComMargem >=
+        0.99
+
+    ) {
+
+        erro =
+
+            "A soma de tributos, taxas, canal e margem " +
+
+            "precisa ser menor que 99%.";
+
+
+    } else {
+
+        precoMinimo =
+
+            (
+                custoBase +
+                pagamentoFixa
+            )
+
+            /
+
+            (
+                1 -
+                taxasSemMargem
+            );
+
+
+        precoBruto =
+
+            (
+                custoBase +
+                pagamentoFixa
+            )
+
+            /
+
+            (
+                1 -
+                totalComMargem
+            );
+
+    }
+
+
+    const sugerido =
+
+        erro
+
+        ? 0
+
+        : arredondarComercial(
+            precoBruto
+        );
+
+
+    const valorTributos =
+
+        sugerido
+
+        *
+
+        (
+            (
+                tributos +
+                outrosTributos
+            )
+
+            /
+            100
+        );
+
+
+    const valorTaxas =
+
+        sugerido
+
+        *
+
+        (
+            (
+                pagamentoPct +
+                canalPct
+            )
+
+            /
+            100
+        )
+
+        +
+
+        pagamentoFixa;
+
+
+    const lucro =
+
+        Math.max(
+
+            0,
+
+            sugerido -
+            custoBase -
+            valorTributos -
+            valorTaxas
+
+        );
+
+
+    const resultado = {
+
+        filamentos,
+
+        custoMaterial,
+
+        energia,
+
+        depreciacao,
+
+        maoObra,
+
+        perdas,
+
+        adicionais,
+
+        custoAdicionais,
+
+        outrosCustos,
+
+        custoBase,
+
+        tributos,
+
+        outrosTributos,
+
+        pagamentoPct,
+
+        pagamentoFixa,
+
+        canalPct,
+
+        margem,
+
+        precoMinimo,
+
+        precoBruto,
+
+        sugerido,
+
+        valorTributos,
+
+        valorTaxas,
+
+        lucro,
+
+        erro,
+
+        horas,
+
+        potencia
+
+    };
+
+
+    estado.ultimoCalculo =
+        resultado;
+
+
+    const mapa = {
+
+        "#r-material":
+            custoMaterial,
+
+        "#r-energia":
+            energia,
+
+        "#r-depreciacao":
+            depreciacao,
+
+        "#r-maoobra":
+            maoObra,
+
+        "#r-perdas":
+            perdas,
+
+        "#r-adicionais":
+
+            custoAdicionais +
+            outrosCustos,
+
+        "#r-custo-base":
+            custoBase,
+
+        "#r-preco-minimo":
+            precoMinimo,
+
+        "#r-preco-sugerido":
+            sugerido,
+
+        "#r-tributos":
+            valorTributos,
+
+        "#r-taxas":
+            valorTaxas,
+
+        "#r-lucro":
+            lucro
+
+    };
+
+
+    Object.entries(
+        mapa
+    )
+
+    .forEach(
+
+        ([
+            seletor,
+            valor
+        ]) => {
+
+            if ($(seletor)) {
+
+                $(seletor)
+                    .textContent =
+                    dinheiro(
+                        valor
+                    );
+
+            }
+
+        }
+
+    );
+
+
+    if ($("#prec-erro")) {
+
+        $("#prec-erro")
+            .textContent =
+            erro;
+
+
+        $("#prec-erro")
+            .hidden =
+            !erro;
+
+    }
+
+
+    if ($("#prec-atualizar-produto")) {
+
+        $("#prec-atualizar-produto")
+            .disabled =
+
+            !$("#prec-produto")
+                ?.value
+
+            ||
+
+            !!erro;
+
+    }
+
+
+    return resultado;
 
 }
 
 
-/* =====================================================
-   ATUALIZAÇÃO GERAL
-===================================================== */
+/* HISTÓRICO */
 
-function atualizarPainel() {
+function renderizarHistorico() {
 
-    atualizarIndicadores();
-
-    renderizarRecentes();
-
-    renderizarProdutos();
-
-    renderizarPedidos();
-
-    renderizarCustos();
-
-    renderizarFilamentos();
+    const tabela =
+        $("#tabela-historico-prec");
 
 
-    if ($("#data-atual")) {
+    if (!tabela) {
 
-        $("#data-atual")
-            .textContent =
+        return;
 
-            new Date()
-                .toLocaleDateString(
+    }
 
-                    "pt-BR",
 
-                    {
+    const lista =
 
-                        day:
-                            "2-digit",
+        [
+            ...estado.historico
+        ]
 
-                        month:
-                            "long",
+        .reverse()
 
-                        year:
-                            "numeric"
+        .slice(
+            0,
+            100
+        );
 
-                    }
 
-                );
+    tabela.innerHTML =
+
+        lista.length
+
+        ? lista.map(
+
+            historico => `
+
+                <tr>
+
+                    <td>
+
+                        ${formatarData(
+                            historico.data
+                        )}
+
+                    </td>
+
+                    <td>
+
+                        ${esc(
+                            historico.produtoNome ||
+                            "Avulso"
+                        )}
+
+                    </td>
+
+                    <td>
+
+                        ${esc(
+                            historico.canalLabel ||
+                            historico.canal ||
+                            ""
+                        )}
+
+                    </td>
+
+                    <td>
+
+                        ${
+                            (
+                                historico.filamentos ||
+                                []
+                            )
+
+                            .map(
+
+                                filamento =>
+
+                                    `${esc(
+                                        filamento.codigo
+                                    )}: ${
+                                        numero(
+                                            filamento.gramas
+                                        )
+                                    }g`
+
+                            )
+
+                            .join(
+                                "<br>"
+                            )
+
+                            ||
+                            "—"
+                        }
+
+                    </td>
+
+                    <td>
+
+                        ${dinheiro(
+                            historico.custoBase
+                        )}
+
+                    </td>
+
+                    <td>
+
+                        ${dinheiro(
+                            historico.precoSugerido
+                        )}
+
+                    </td>
+
+                    <td>
+
+                        ${
+                            historico.baixouEstoque
+                                ? "Sim"
+                                : "Não"
+                        }
+
+                    </td>
+
+                </tr>
+
+            `
+
+        ).join("")
+
+        : `
+
+            <tr>
+
+                <td colspan="7">
+                    Nenhuma precificação registrada.
+                </td>
+
+            </tr>
+
+        `;
+
+}
+
+
+function salvarCalculoHistorico(
+    baixouEstoque
+) {
+
+    const resultado =
+        calcularPrecificacao();
+
+
+    if (
+
+        !resultado ||
+        resultado.erro
+
+    ) {
+
+        avisar(
+
+            resultado?.erro ||
+            "Não foi possível calcular.",
+
+            true
+
+        );
+
+        return null;
+
+    }
+
+
+    const produtoId =
+        $("#prec-produto")
+            ?.value;
+
+
+    const produto =
+
+        estado.produtos
+
+        .find(
+
+            item =>
+
+                String(
+                    item.id
+                )
+
+                ===
+
+                String(
+                    produtoId
+                )
+
+        );
+
+
+    const canal =
+        $("#prec-canal")
+            ?.value ||
+        "direta";
+
+
+    const canalLabel =
+
+        $("#prec-canal")
+            ?.selectedOptions?.[0]
+            ?.textContent
+            ?.trim()
+
+        ||
+
+        canal;
+
+
+    const historico = {
+
+        id:
+            criarID(),
+
+        data:
+            agoraISO(),
+
+        produtoId:
+            produto?.id ||
+            null,
+
+        produtoNome:
+            produto?.nome ||
+            "Avulso",
+
+        canal,
+
+        canalLabel,
+
+        filamentos:
+
+            resultado.filamentos
+
+            .map(
+
+                filamento => ({
+
+                    id:
+                        filamento.id,
+
+                    codigo:
+                        filamento.codigo,
+
+                    material:
+                        filamento.material,
+
+                    cor:
+                        filamento.cor,
+
+                    gramas:
+                        filamento.gramas,
+
+                    custo:
+                        filamento.custo
+
+                })
+
+            ),
+
+        custoBase:
+            resultado.custoBase,
+
+        precoMinimo:
+            resultado.precoMinimo,
+
+        precoSugerido:
+            resultado.sugerido,
+
+        lucro:
+            resultado.lucro,
+
+        baixouEstoque,
+
+        config: {
+
+            tributos:
+                resultado.tributos,
+
+            outrosTributos:
+                resultado.outrosTributos,
+
+            pagamentoPct:
+                resultado.pagamentoPct,
+
+            pagamentoFixa:
+                resultado.pagamentoFixa,
+
+            canalPct:
+                resultado.canalPct,
+
+            margem:
+                resultado.margem
+
+        }
+
+    };
+
+
+    estado.historico.push(
+        historico
+    );
+
+
+    salvarHistorico();
+
+
+    return historico;
+
+}
+
+
+function salvarCalculoSemBaixa() {
+
+    const historico =
+        salvarCalculoHistorico(
+            false
+        );
+
+
+    if (historico) {
+
+        avisar(
+            "Precificação salva no histórico."
+        );
 
     }
 
 }
 
 
-/* =====================================================
-   ARQUIVOS
-===================================================== */
+/* BAIXA AUTOMÁTICA DE FILAMENTO */
+
+function registrarProducaoBaixarFilamento() {
+
+    const resultado =
+        calcularPrecificacao();
+
+
+    if (
+
+        !resultado ||
+        resultado.erro
+
+    ) {
+
+        avisar(
+
+            resultado?.erro ||
+            "Não foi possível calcular.",
+
+            true
+
+        );
+
+        return;
+
+    }
+
+
+    if (
+
+        !resultado.filamentos
+            .length
+
+    ) {
+
+        avisar(
+
+            "Selecione pelo menos um filamento " +
+
+            "e informe o consumo em gramas.",
+
+            true
+
+        );
+
+        return;
+
+    }
+
+
+    const consumo =
+        new Map();
+
+
+    /*
+    Se o mesmo filamento for usado em mais de uma troca,
+    os consumos são somados.
+    */
+
+    for (
+
+        const item
+        of resultado.filamentos
+
+    ) {
+
+        const chave =
+            String(
+                item.id
+            );
+
+
+        consumo.set(
+
+            chave,
+
+            (
+                consumo.get(
+                    chave
+                ) ||
+                0
+            )
+
+            +
+
+            item.gramas
+
+        );
+
+    }
+
+
+    /*
+    Primeiro validamos todo o estoque.
+    Nenhum filamento é alterado se algum deles
+    não tiver saldo suficiente.
+    */
+
+    for (
+
+        const [
+            id,
+            gramas
+        ]
+
+        of consumo
+
+    ) {
+
+        const filamento =
+
+            estado.filamentos
+
+            .find(
+
+                item =>
+
+                    String(
+                        item.id
+                    )
+
+                    ===
+
+                    id
+
+            );
+
+
+        if (!filamento) {
+
+            avisar(
+
+                "Filamento não encontrado.",
+
+                true
+
+            );
+
+            return;
+
+        }
+
+
+        if (
+
+            numero(
+                filamento.pesoRestante
+            )
+
+            <
+
+            gramas
+
+        ) {
+
+            avisar(
+
+                `Saldo insuficiente no filamento ${
+                    filamento.codigo
+                }. Disponível: ${
+                    numero(
+                        filamento.pesoRestante
+                    )
+                } g.`,
+
+                true
+
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    const resumo =
+
+        [
+            ...consumo
+        ]
+
+        .map(
+
+            ([
+                id,
+                gramas
+            ]) => {
+
+                const filamento =
+
+                    estado.filamentos
+
+                    .find(
+
+                        item =>
+
+                            String(
+                                item.id
+                            )
+
+                            ===
+
+                            id
+
+                    );
+
+
+                return `
+
+                    ${filamento.codigo}
+
+                    (${filamento.material} ${filamento.cor}):
+
+                    -${gramas} g
+
+                `
+
+                .replace(
+                    /\s+/g,
+                    " "
+                )
+
+                .trim();
+
+            }
+
+        )
+
+        .join(
+            "\n"
+        );
+
+
+    if (
+
+        !confirm(
+
+            "Registrar produção e dar baixa nos filamentos?\n\n"
+
+            +
+
+            resumo
+
+        )
+
+    ) {
+
+        return;
+
+    }
+
+
+    estado.filamentos =
+
+        estado.filamentos
+
+        .map(
+
+            filamento => {
+
+                const gramas =
+
+                    consumo.get(
+                        String(
+                            filamento.id
+                        )
+                    )
+
+                    ||
+
+                    0;
+
+
+                if (!gramas) {
+
+                    return filamento;
+
+                }
+
+
+                return {
+
+                    ...filamento,
+
+                    pesoRestante:
+
+                        Math.max(
+
+                            0,
+
+                            numero(
+                                filamento.pesoRestante
+                            )
+
+                            -
+
+                            gramas
+
+                        ),
+
+                    atualizado_em:
+                        agoraISO()
+
+                };
+
+            }
+
+        );
+
+
+    salvarFilamentosLocal();
+
+
+    const historico =
+        salvarCalculoHistorico(
+            true
+        );
+
+
+    avisar(
+
+        historico
+
+        ? "Produção registrada e estoque de filamentos atualizado."
+
+        : "Estoque atualizado."
+
+    );
+
+
+    renderizarPrecificacao();
+
+}
+
+
+/* ATUALIZAR PREÇO NO SUPABASE */
+
+async function atualizarPrecoProduto() {
+
+    const id =
+        $("#prec-produto")
+            ?.value;
+
+
+    const resultado =
+        calcularPrecificacao();
+
+
+    if (
+
+        !id ||
+        !resultado ||
+        resultado.erro ||
+        resultado.sugerido <=
+        0
+
+    ) {
+
+        avisar(
+
+            "Selecione um produto e calcule um preço válido.",
+
+            true
+
+        );
+
+        return;
+
+    }
+
+
+    const produto =
+
+        estado.produtos
+
+        .find(
+
+            item =>
+
+                String(
+                    item.id
+                )
+
+                ===
+
+                String(
+                    id
+                )
+
+        );
+
+
+    if (!produto) {
+
+        return;
+
+    }
+
+
+    if (
+
+        !confirm(
+
+            `Atualizar o preço de "${produto.nome}" para ${dinheiro(
+                resultado.sugerido
+            )}?`
+
+        )
+
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await salvarCatalogo(
+
+            estado.produtos
+
+            .map(
+
+                item =>
+
+                    String(
+                        item.id
+                    )
+
+                    ===
+
+                    String(
+                        id
+                    )
+
+                    ? {
+
+                        ...item,
+
+                        preco:
+                            resultado.sugerido,
+
+                        atualizado_em:
+                            agoraISO()
+
+                    }
+
+                    : item
+
+            )
+
+        );
+
+
+        preencherSelectProdutosPrec();
+
+
+        $("#prec-produto")
+            .value =
+            id;
+
+
+        avisar(
+
+            "Preço do produto atualizado no catálogo."
+
+        );
+
+
+    } catch (
+        erro
+    ) {
+
+        avisar(
+
+            erro.message,
+
+            true
+
+        );
+
+    }
+
+}
+
+
+function renderizarPrecificacao() {
+
+    preencherSelectProdutosPrec();
+
+    preencherSelectsFilamentos();
+
+    renderizarAdicionais();
+
+    renderizarHistorico();
+
+    calcularPrecificacao();
+
+}
+
+
+/* EXPORTAÇÃO */
 
 function baixarArquivo(
 
@@ -3452,10 +6504,13 @@ function baixarArquivo(
     const blob =
         new Blob(
 
-            [conteudo],
+            [
+                conteudo
+            ],
 
             {
-                type: tipo
+                type:
+                    tipo
             }
 
         );
@@ -3494,52 +6549,13 @@ function baixarArquivo(
 
     setTimeout(
 
-        () => {
+        () =>
 
             URL.revokeObjectURL(
                 url
-            );
-
-        },
+            ),
 
         1000
-
-    );
-
-}
-
-
-function campoCSV(valor) {
-
-    let texto =
-        String(valor ?? "");
-
-
-    if (
-
-        /^[\s]*[=+\-@]/
-            .test(texto)
-
-    ) {
-
-        texto =
-            "'" + texto;
-
-    }
-
-
-    return (
-
-        '"' +
-
-        texto.replaceAll(
-            '"',
-            '""'
-        )
-
-        +
-
-        '"'
 
     );
 
@@ -3556,23 +6572,86 @@ function exportarCSV(
 
 ) {
 
+    function campo(
+        valor
+    ) {
+
+        let texto =
+            String(
+                valor ??
+                ""
+            );
+
+
+        if (
+
+            /^[\s]*[=+\-@]/
+            .test(
+                texto
+            )
+
+        ) {
+
+            texto =
+                "'" +
+                texto;
+
+        }
+
+
+        return (
+
+            '"' +
+
+            texto.replaceAll(
+                '"',
+                '""'
+            )
+
+            +
+
+            '"'
+
+        );
+
+    }
+
+
     const conteudo = [
 
         cabecalho
-            .map(campoCSV)
-            .join(";"),
 
-        ...linhas.map(
+            .map(
+                campo
+            )
+
+            .join(
+                ";"
+            ),
+
+        ...linhas
+
+        .map(
 
             linha =>
 
                 linha
-                    .map(campoCSV)
-                    .join(";")
+
+                .map(
+                    campo
+                )
+
+                .join(
+                    ";"
+                )
 
         )
 
-    ].join("\r\n");
+    ]
+
+    .join(
+        "\r\n"
+    );
 
 
     baixarArquivo(
@@ -3589,9 +6668,7 @@ function exportarCSV(
 }
 
 
-/* =====================================================
-   BACKUP
-===================================================== */
+/* BACKUP */
 
 function exportarBackup() {
 
@@ -3616,7 +6693,16 @@ function exportarBackup() {
                     estado.custos,
 
                 filamentos:
-                    estado.filamentos
+                    estado.filamentos,
+
+                precConfig:
+                    estado.precConfig,
+
+                adicionais:
+                    estado.adicionais,
+
+                historico:
+                    estado.historico
 
             },
 
@@ -3638,7 +6724,8 @@ async function restaurarBackup(
 ) {
 
     const arquivo =
-        evento.target.files?.[0];
+        evento.target
+            .files?.[0];
 
 
     if (!arquivo) {
@@ -3700,11 +6787,101 @@ async function restaurarBackup(
         }
 
 
-        salvarPedidosLocal();
+        if (
+            dados.precConfig
+        ) {
 
-        salvarCustosLocal();
+            estado.precConfig = {
 
-        salvarFilamentosLocal();
+                ...copiar(
+                    CONFIG_PADRAO
+                ),
+
+                ...dados.precConfig,
+
+                canais: {
+
+                    ...CONFIG_PADRAO.canais,
+
+                    ...(
+                        dados.precConfig
+                            .canais ||
+                        {}
+                    )
+
+                }
+
+            };
+
+        }
+
+
+        if (
+
+            Array.isArray(
+                dados.adicionais
+            )
+
+        ) {
+
+            estado.adicionais =
+                dados.adicionais;
+
+        }
+
+
+        if (
+
+            Array.isArray(
+                dados.historico
+            )
+
+        ) {
+
+            estado.historico =
+                dados.historico;
+
+        }
+
+
+        salvarLocal(
+            KEYS.pedidos,
+            estado.pedidos
+        );
+
+
+        salvarLocal(
+            KEYS.custos,
+            estado.custos
+        );
+
+
+        salvarLocal(
+            KEYS.filamentos,
+            estado.filamentos
+        );
+
+
+        salvarPrecConfig();
+
+
+        salvarLocal(
+            KEYS.adicionais,
+            estado.adicionais
+        );
+
+
+        salvarLocal(
+            KEYS.historico,
+            estado.historico
+        );
+
+
+        migrarCodigosFilamentos();
+
+        carregarConfigNosCampos();
+
+        atualizarPainel();
 
 
         avisar(
@@ -3712,10 +6889,7 @@ async function restaurarBackup(
         );
 
 
-    } catch (erro) {
-
-        console.error(erro);
-
+    } catch {
 
         avisar(
 
@@ -3734,9 +6908,57 @@ async function restaurarBackup(
 }
 
 
-/* =====================================================
-   EVENTOS
-===================================================== */
+/* ATUALIZAÇÃO GERAL */
+
+function atualizarPainel() {
+
+    atualizarIndicadores();
+
+    renderizarRecentes();
+
+    renderizarProdutos();
+
+    renderizarPedidos();
+
+    renderizarCustos();
+
+    renderizarFilamentos();
+
+    preencherSelectProdutosPrec();
+
+    renderizarHistorico();
+
+
+    if ($("#data-atual")) {
+
+        $("#data-atual")
+            .textContent =
+
+            new Date()
+
+            .toLocaleDateString(
+
+                "pt-BR",
+
+                {
+                    day:
+                        "2-digit",
+
+                    month:
+                        "long",
+
+                    year:
+                        "numeric"
+                }
+
+            );
+
+    }
+
+}
+
+
+/* EVENTOS */
 
 function configurarEventos() {
 
@@ -3756,9 +6978,7 @@ function configurarEventos() {
             if (pagina) {
 
                 abrirPagina(
-
                     pagina.dataset.pagina
-
                 );
 
                 return;
@@ -3794,178 +7014,142 @@ function configurarEventos() {
             if (fechar) {
 
                 document
-                    .getElementById(
-                        fechar.dataset.fechar
-                    )
-                    ?.close();
+
+                .getElementById(
+                    fechar.dataset.fechar
+                )
+
+                ?.close();
+
 
                 return;
 
             }
 
 
-            const produtoEditar =
+            const acoes = [
+
+                [
+                    "[data-produto-editar]",
+
+                    elemento =>
+                        editarProduto(
+                            elemento.dataset
+                                .produtoEditar
+                        )
+                ],
+
+                [
+                    "[data-produto-excluir]",
+
+                    elemento =>
+                        excluirProduto(
+                            elemento.dataset
+                                .produtoExcluir
+                        )
+                ],
+
+                [
+                    "[data-pedido-editar]",
 
-                evento.target.closest(
-                    "[data-produto-editar]"
-                );
+                    elemento =>
+                        editarPedido(
+                            elemento.dataset
+                                .pedidoEditar
+                        )
+                ],
 
+                [
+                    "[data-pedido-excluir]",
 
-            if (produtoEditar) {
+                    elemento =>
+                        excluirPedido(
+                            elemento.dataset
+                                .pedidoExcluir
+                        )
+                ],
 
-                editarProduto(
+                [
+                    "[data-custo-editar]",
 
-                    produtoEditar.dataset
-                        .produtoEditar
+                    elemento =>
+                        editarCusto(
+                            elemento.dataset
+                                .custoEditar
+                        )
+                ],
 
-                );
+                [
+                    "[data-custo-excluir]",
 
-                return;
+                    elemento =>
+                        excluirCusto(
+                            elemento.dataset
+                                .custoExcluir
+                        )
+                ],
 
-            }
+                [
+                    "[data-filamento-editar]",
 
+                    elemento =>
+                        editarFilamento(
+                            elemento.dataset
+                                .filamentoEditar
+                        )
+                ],
 
-            const produtoExcluir =
+                [
+                    "[data-filamento-excluir]",
 
-                evento.target.closest(
-                    "[data-produto-excluir]"
-                );
+                    elemento =>
+                        excluirFilamento(
+                            elemento.dataset
+                                .filamentoExcluir
+                        )
+                ],
 
+                [
+                    "[data-adicional-excluir]",
 
-            if (produtoExcluir) {
+                    elemento =>
+                        excluirAdicional(
+                            elemento.dataset
+                                .adicionalExcluir
+                        )
+                ]
 
-                excluirProduto(
+            ];
 
-                    produtoExcluir.dataset
-                        .produtoExcluir
 
-                );
+            for (
 
-                return;
+                const [
+                    seletor,
+                    funcao
+                ]
 
-            }
+                of acoes
 
+            ) {
 
-            const pedidoEditar =
+                const elemento =
+                    evento.target.closest(
+                        seletor
+                    );
 
-                evento.target.closest(
-                    "[data-pedido-editar]"
-                );
 
+                if (elemento) {
 
-            if (pedidoEditar) {
+                    evento.preventDefault();
 
-                editarPedido(
+                    funcao(
+                        elemento
+                    );
 
-                    pedidoEditar.dataset
-                        .pedidoEditar
+                    return;
 
-                );
-
-                return;
-
-            }
-
-
-            const pedidoExcluir =
-
-                evento.target.closest(
-                    "[data-pedido-excluir]"
-                );
-
-
-            if (pedidoExcluir) {
-
-                excluirPedido(
-
-                    pedidoExcluir.dataset
-                        .pedidoExcluir
-
-                );
-
-                return;
-
-            }
-
-
-            const custoEditar =
-
-                evento.target.closest(
-                    "[data-custo-editar]"
-                );
-
-
-            if (custoEditar) {
-
-                editarCusto(
-
-                    custoEditar.dataset
-                        .custoEditar
-
-                );
-
-                return;
-
-            }
-
-
-            const custoExcluir =
-
-                evento.target.closest(
-                    "[data-custo-excluir]"
-                );
-
-
-            if (custoExcluir) {
-
-                excluirCusto(
-
-                    custoExcluir.dataset
-                        .custoExcluir
-
-                );
-
-                return;
-
-            }
-
-
-            const filamentoEditar =
-
-                evento.target.closest(
-                    "[data-filamento-editar]"
-                );
-
-
-            if (filamentoEditar) {
-
-                editarFilamento(
-
-                    filamentoEditar.dataset
-                        .filamentoEditar
-
-                );
-
-                return;
-
-            }
-
-
-            const filamentoExcluir =
-
-                evento.target.closest(
-                    "[data-filamento-excluir]"
-                );
-
-
-            if (filamentoExcluir) {
-
-                excluirFilamento(
-
-                    filamentoExcluir.dataset
-                        .filamentoExcluir
-
-                );
+                }
 
             }
 
@@ -4072,40 +7256,392 @@ function configurarEventos() {
         );
 
 
-    [
+    $("#salvar-config-prec")
+        ?.addEventListener(
+            "click",
+            lerConfigDosCampos
+        );
 
-        "#sim-filamento",
 
-        "#sim-gramas",
+    $("#novo-adicional-btn")
+        ?.addEventListener(
+            "click",
+            adicionarAdicional
+        );
 
-        "#sim-horas",
 
-        "#sim-potencia",
+    $("#prec-canal")
+        ?.addEventListener(
+            "change",
+            atualizarTaxaCanal
+        );
 
-        "#sim-energia",
 
-        "#sim-margem"
+    $("#prec-salvar-calculo")
+        ?.addEventListener(
+            "click",
+            salvarCalculoSemBaixa
+        );
 
-    ].forEach(
+
+    $("#prec-baixar-estoque")
+        ?.addEventListener(
+            "click",
+            registrarProducaoBaixarFilamento
+        );
+
+
+    $("#prec-atualizar-produto")
+        ?.addEventListener(
+            "click",
+            atualizarPrecoProduto
+        );
+
+
+    const camposPrecificacao = [
+
+        "#prec-produto",
+
+        "#prec-horas",
+
+        "#prec-potencia",
+
+        "#prec-energia",
+
+        "#prec-maoobra-min",
+
+        "#prec-maoobra-hora",
+
+        "#prec-perdas",
+
+        "#prec-tributos",
+
+        "#prec-outros-tributos",
+
+        "#prec-taxa-pagamento",
+
+        "#prec-taxa-fixa",
+
+        "#prec-taxa-canal",
+
+        "#prec-margem",
+
+        "#prec-impressora-valor",
+
+        "#prec-impressora-vida",
+
+        "#prec-outros-custos",
+
+        "#prec-filamento-1",
+
+        "#prec-filamento-2",
+
+        "#prec-filamento-3",
+
+        "#prec-filamento-4",
+
+        "#prec-gramas-1",
+
+        "#prec-gramas-2",
+
+        "#prec-gramas-3",
+
+        "#prec-gramas-4"
+
+    ];
+
+
+    camposPrecificacao
+
+    .forEach(
 
         seletor => {
 
             $(seletor)
                 ?.addEventListener(
                     "input",
-                    calcularSimulador
+                    calcularPrecificacao
                 );
 
 
             $(seletor)
                 ?.addEventListener(
                     "change",
-                    calcularSimulador
+                    calcularPrecificacao
                 );
 
         }
 
     );
+
+
+    $("#prec-adicionais-lista")
+        ?.addEventListener(
+            "change",
+            calcularPrecificacao
+        );
+
+
+    $("#exportar-pedidos")
+        ?.addEventListener(
+
+            "click",
+
+            () =>
+
+                exportarCSV(
+
+                    "pedidos-criaitor3d.csv",
+
+                    [
+                        "Cliente",
+                        "Contato",
+                        "Produtos",
+                        "Valor",
+                        "Status",
+                        "Data"
+                    ],
+
+                    estado.pedidos
+
+                    .map(
+
+                        item => [
+
+                            item.cliente,
+                            item.contato,
+                            item.itens,
+                            item.valor,
+                            item.status,
+                            item.data
+
+                        ]
+
+                    )
+
+                )
+
+        );
+
+
+    $("#exportar-custos")
+        ?.addEventListener(
+
+            "click",
+
+            () =>
+
+                exportarCSV(
+
+                    "custos-criaitor3d.csv",
+
+                    [
+                        "Descrição",
+                        "Categoria",
+                        "Tipo",
+                        "Valor",
+                        "Data",
+                        "Observações"
+                    ],
+
+                    estado.custos
+
+                    .map(
+
+                        item => [
+
+                            item.descricao,
+                            item.categoria,
+                            item.tipo,
+                            item.valor,
+                            item.data,
+                            item.observacoes
+
+                        ]
+
+                    )
+
+                )
+
+        );
+
+
+    $("#exportar-filamentos")
+        ?.addEventListener(
+
+            "click",
+
+            () =>
+
+                exportarCSV(
+
+                    "filamentos-criaitor3d.csv",
+
+                    [
+                        "Código",
+                        "Marca",
+                        "Material",
+                        "Cor",
+                        "Peso original",
+                        "Peso restante",
+                        "Consumido",
+                        "Valor pago",
+                        "Custo/g"
+                    ],
+
+                    estado.filamentos
+
+                    .map(
+
+                        filamento => [
+
+                            filamento.codigo,
+                            filamento.marca,
+                            filamento.material,
+                            filamento.cor,
+                            filamento.pesoOriginal,
+                            filamento.pesoRestante,
+
+                            numero(
+                                filamento.pesoOriginal
+                            )
+
+                            -
+
+                            numero(
+                                filamento.pesoRestante
+                            ),
+
+                            filamento.valorPago,
+
+                            custoGrama(
+                                filamento
+                            )
+
+                        ]
+
+                    )
+
+                )
+
+        );
+
+
+    $("#exportar-historico-prec")
+        ?.addEventListener(
+
+            "click",
+
+            () =>
+
+                exportarCSV(
+
+                    "precificacao-criaitor3d.csv",
+
+                    [
+                        "Data",
+                        "Produto",
+                        "Canal",
+                        "Filamentos",
+                        "Custo base",
+                        "Preço sugerido",
+                        "Baixa estoque"
+                    ],
+
+                    estado.historico
+
+                    .map(
+
+                        historico => [
+
+                            historico.data,
+
+                            historico.produtoNome,
+
+                            historico.canalLabel,
+
+                            (
+                                historico.filamentos ||
+                                []
+                            )
+
+                            .map(
+
+                                filamento =>
+
+                                    `${filamento.codigo}:${filamento.gramas}g`
+
+                            )
+
+                            .join(
+                                " | "
+                            ),
+
+                            historico.custoBase,
+
+                            historico.precoSugerido,
+
+                            historico.baixouEstoque
+                                ? "Sim"
+                                : "Não"
+
+                        ]
+
+                    )
+
+                )
+
+        );
+
+
+    $("#exportar-catalogo")
+        ?.addEventListener(
+
+            "click",
+
+            () =>
+
+                baixarArquivo(
+
+                    "catalogo.js",
+
+                    "window.CRIAITOR_CATALOGO = "
+
+                    +
+
+                    JSON.stringify(
+
+                        estado.produtos,
+
+                        null,
+
+                        2
+
+                    )
+
+                    +
+
+                    ";\n",
+
+                    "text/javascript"
+
+                )
+
+        );
+
+
+    $("#baixar-backup")
+        ?.addEventListener(
+            "click",
+            exportarBackup
+        );
+
+
+    $("#restaurar-backup")
+        ?.addEventListener(
+            "change",
+            restaurarBackup
+        );
 
 
     $("#recarregar-catalogo")
@@ -4125,7 +7661,9 @@ function configurarEventos() {
                     );
 
 
-                } catch (erro) {
+                } catch (
+                    erro
+                ) {
 
                     avisar(
 
@@ -4141,332 +7679,22 @@ function configurarEventos() {
 
         );
 
-
-    $("#exportar-pedidos")
-        ?.addEventListener(
-
-            "click",
-
-            () => {
-
-                exportarCSV(
-
-                    "pedidos-criaitor3d.csv",
-
-                    [
-
-                        "Cliente",
-                        "Contato",
-                        "Produtos",
-                        "Valor",
-                        "Status",
-                        "Data"
-
-                    ],
-
-                    estado.pedidos.map(
-
-                        item => [
-
-                            item.cliente,
-                            item.contato,
-                            item.itens,
-                            item.valor,
-                            item.status,
-                            item.data
-
-                        ]
-
-                    )
-
-                );
-
-            }
-
-        );
-
-
-    $("#exportar-custos")
-        ?.addEventListener(
-
-            "click",
-
-            () => {
-
-                exportarCSV(
-
-                    "custos-criaitor3d.csv",
-
-                    [
-
-                        "Descrição",
-                        "Categoria",
-                        "Tipo",
-                        "Valor",
-                        "Data",
-                        "Observações"
-
-                    ],
-
-                    estado.custos.map(
-
-                        item => [
-
-                            item.descricao,
-                            item.categoria,
-                            item.tipo,
-                            item.valor,
-                            item.data,
-                            item.observacoes
-
-                        ]
-
-                    )
-
-                );
-
-            }
-
-        );
-
-
-    $("#exportar-filamentos")
-        ?.addEventListener(
-
-            "click",
-
-            () => {
-
-                exportarCSV(
-
-                    "filamentos-criaitor3d.csv",
-
-                    [
-
-                        "Marca",
-                        "Material",
-                        "Cor",
-                        "Diâmetro",
-                        "Peso original",
-                        "Peso restante",
-                        "Valor pago",
-                        "Custo por grama"
-
-                    ],
-
-                    estado.filamentos.map(
-
-                        item => [
-
-                            item.marca,
-                            item.material,
-                            item.cor,
-                            item.diametro,
-                            item.pesoOriginal,
-                            item.pesoRestante,
-                            item.valorPago,
-                            custoGrama(item)
-
-                        ]
-
-                    )
-
-                );
-
-            }
-
-        );
-
-
-    $("#exportar-catalogo")
-        ?.addEventListener(
-
-            "click",
-
-            () => {
-
-                baixarArquivo(
-
-                    "catalogo.js",
-
-                    "window.CRIAITOR_CATALOGO = " +
-
-                    JSON.stringify(
-
-                        estado.produtos,
-
-                        null,
-
-                        2
-
-                    )
-
-                    +
-
-                    ";\n",
-
-                    "text/javascript"
-
-                );
-
-            }
-
-        );
-
-
-    $("#baixar-backup")
-        ?.addEventListener(
-            "click",
-            exportarBackup
-        );
-
-
-    $("#restaurar-backup")
-        ?.addEventListener(
-            "change",
-            restaurarBackup
-        );
-
 }
 
 
-/* =====================================================
-   ATUALIZAÇÕES
-===================================================== */
-
-async function verificarAtualizacoes() {
-
-    if (
-
-        !sb ||
-
-        estado.salvandoCatalogo ||
-
-        $("#modal-produto")
-            ?.open
-
-    ) {
-
-        return;
-
-    }
-
-
-    try {
-
-        const {
-
-            data,
-
-            error
-
-        } = await sb
-
-            .from(CONFIG.tabela)
-
-            .select("versao")
-
-            .eq(
-                "id",
-                CONFIG.registro
-            )
-
-            .single();
-
-
-        if (error) {
-
-            return;
-
-        }
-
-
-        if (
-
-            numero(
-                data.versao
-            )
-
-            !==
-
-            estado.versao
-
-        ) {
-
-            await carregarCatalogo();
-
-        }
-
-
-    } catch {
-
-        /* mantém o painel funcionando */
-
-    }
-
-}
-
-
-/* =====================================================
-   API EXTERNA
-===================================================== */
-
-window.CRIAITOR_ADMIN = {
-
-    recarregar:
-        carregarCatalogo,
-
-    atualizar:
-        atualizarPainel,
-
-    abrirPagina,
-
-    abrirNovoProduto,
-
-    getProdutos:
-
-        () => [
-            ...estado.produtos
-        ],
-
-    getVersao:
-
-        () =>
-            estado.versao,
-
-    getUsuario:
-
-        () => null,
-
-    getCustos:
-
-        () => [
-            ...estado.custos
-        ],
-
-    getFilamentos:
-
-        () => [
-            ...estado.filamentos
-        ]
-
-};
-
-
-/* =====================================================
-   INICIAR
-===================================================== */
+/* INICIAR */
 
 async function iniciar() {
 
-    carregarDadosLocais();
+    carregarLocais();
 
     configurarEventos();
+
+    carregarConfigNosCampos();
 
     abrirPagina(
         "dashboard"
     );
-
 
     atualizarPainel();
 
@@ -4475,9 +7703,14 @@ async function iniciar() {
 
         await carregarCatalogo();
 
-    } catch (erro) {
 
-        console.error(erro);
+    } catch (
+        erro
+    ) {
+
+        console.error(
+            erro
+        );
 
 
         avisar(
@@ -4493,13 +7726,126 @@ async function iniciar() {
 
     setInterval(
 
-        verificarAtualizacoes,
+        async () => {
+
+            if (
+
+                estado.salvandoCatalogo
+
+                ||
+
+                $("#modal-produto")
+                    ?.open
+
+            ) {
+
+                return;
+
+            }
+
+
+            try {
+
+                const {
+                    data,
+                    error
+                } = await sb
+
+                    .from(
+                        CONFIG.tabela
+                    )
+
+                    .select(
+                        "versao"
+                    )
+
+                    .eq(
+                        "id",
+                        CONFIG.registro
+                    )
+
+                    .single();
+
+
+                if (
+
+                    !error
+
+                    &&
+
+                    numero(
+                        data.versao
+                    )
+
+                    !==
+
+                    estado.versao
+
+                ) {
+
+                    await carregarCatalogo();
+
+                }
+
+
+            } catch {
+
+                /* mantém painel funcionando */
+
+            }
+
+        },
 
         30000
 
     );
 
 }
+
+
+/* API */
+
+window.CRIAITOR_ADMIN = {
+
+    recarregar:
+        carregarCatalogo,
+
+    atualizar:
+        atualizarPainel,
+
+    abrirPagina,
+
+    abrirNovoProduto,
+
+    getProdutos:
+        () => [
+            ...estado.produtos
+        ],
+
+    getVersao:
+        () =>
+            estado.versao,
+
+    getUsuario:
+        () =>
+            null,
+
+    getCustos:
+        () => [
+            ...estado.custos
+        ],
+
+    getFilamentos:
+        () => [
+            ...estado.filamentos
+        ],
+
+    getHistoricoPrecificacao:
+        () => [
+            ...estado.historico
+        ]
+
+};
 
 
 if (
@@ -4516,10 +7862,12 @@ if (
         iniciar,
 
         {
-            once: true
+            once:
+                true
         }
 
     );
+
 
 } else {
 
