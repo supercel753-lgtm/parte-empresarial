@@ -3,19 +3,26 @@
 "use strict";
 
 
+const sb =
+    window.sb;
+
+
+const configuracao =
+    window.CRIAITOR_SUPABASE_CONFIG ||
+    {};
+
+
 const CONFIG = {
 
     bucket:
-        window.CRIAITOR_SUPABASE_CONFIG
-            ?.bucket ||
+        configuracao.bucket ||
         "projetos",
 
     pasta:
-        window.CRIAITOR_SUPABASE_CONFIG
-            ?.pastaImagens ||
+        configuracao.pastaImagens ||
         "catalogo",
 
-    tamanhoMaximo:
+    max:
         5 * 1024 * 1024
 
 };
@@ -35,10 +42,6 @@ const TIPOS = {
 };
 
 
-const sb =
-    window.sb;
-
-
 const formulario =
     document.querySelector(
         "#form-produto"
@@ -46,16 +49,6 @@ const formulario =
 
 
 if (!formulario) {
-
-    console.warn(
-
-        "CriAItor Fotos: " +
-
-        "formulário de produtos " +
-
-        "não encontrado."
-
-    );
 
     return;
 
@@ -71,22 +64,10 @@ const campoImagem =
 
 if (!campoImagem) {
 
-    console.warn(
-
-        "CriAItor Fotos: " +
-
-        "campo imagem não encontrado."
-
-    );
-
     return;
 
 }
 
-
-/* =====================================================
-   ESTADO
-===================================================== */
 
 const estado = {
 
@@ -96,49 +77,34 @@ const estado = {
     enviando:
         false,
 
-    urlAtual:
-        "",
-
-    urlPreviewLocal:
+    previewLocal:
         null
 
 };
 
 
-/* =====================================================
-   ID
-===================================================== */
-
 function criarID() {
 
-    if (
+    return window.crypto
+        ?.randomUUID
 
-        window.crypto &&
-        crypto.randomUUID
+        ? crypto.randomUUID()
 
-    ) {
+        : (
 
-        return crypto.randomUUID();
+            Date.now()
+                .toString(36)
 
-    }
+            +
 
+            Math.random()
+                .toString(36)
+                .slice(2)
 
-    return (
-
-        Date.now().toString(36) +
-
-        Math.random()
-            .toString(36)
-            .slice(2)
-
-    );
+        );
 
 }
 
-
-/* =====================================================
-   INTERFACE
-===================================================== */
 
 const area =
     document.createElement(
@@ -157,7 +123,6 @@ area.innerHTML = `
         id="zona-upload-produto"
         tabindex="0"
         role="button"
-        aria-label="Selecionar fotografia do produto"
     >
 
         <div class="icone-upload">
@@ -169,8 +134,7 @@ area.innerHTML = `
         </strong>
 
         <span>
-            Arraste uma imagem aqui,
-            clique para selecionar
+            Arraste, clique para selecionar
             ou cole com Ctrl+V.
         </span>
 
@@ -201,7 +165,7 @@ area.innerHTML = `
 
         <img
             id="preview-foto"
-            alt="Pré-visualização da fotografia"
+            alt="Pré-visualização"
         >
 
         <div class="preview-informacoes">
@@ -240,6 +204,7 @@ if (campoLegado) {
         area
     );
 
+
 } else {
 
     campoImagem.before(
@@ -249,17 +214,13 @@ if (campoLegado) {
 }
 
 
-/* =====================================================
-   ELEMENTOS
-===================================================== */
-
 const zona =
     area.querySelector(
         "#zona-upload-produto"
     );
 
 
-const inputArquivo =
+const input =
     area.querySelector(
         "#arquivo-foto-produto"
     );
@@ -289,11 +250,7 @@ const trocar =
     );
 
 
-/* =====================================================
-   STATUS
-===================================================== */
-
-function mostrarStatus(
+function setStatus(
 
     mensagem,
 
@@ -316,24 +273,20 @@ function mostrarStatus(
 }
 
 
-/* =====================================================
-   LIMPAR URL LOCAL
-===================================================== */
-
-function liberarPreviewLocal() {
+function liberarPreview() {
 
     if (
 
-        estado.urlPreviewLocal
+        estado.previewLocal
 
     ) {
 
         URL.revokeObjectURL(
-            estado.urlPreviewLocal
+            estado.previewLocal
         );
 
 
-        estado.urlPreviewLocal =
+        estado.previewLocal =
             null;
 
     }
@@ -341,82 +294,72 @@ function liberarPreviewLocal() {
 }
 
 
-/* =====================================================
-   PREVIEW
-===================================================== */
-
 function mostrarPreview(
     url
 ) {
 
-    if (!url) {
+    previewContainer.hidden =
+        !url;
 
-        previewContainer.hidden =
-            true;
 
+    if (url) {
+
+        preview.src =
+            url;
+
+
+    } else {
 
         preview.removeAttribute(
             "src"
         );
 
+    }
+
+}
+
+
+function sincronizar() {
+
+    if (
+
+        estado.arquivo
+
+    ) {
 
         return;
 
     }
 
 
-    preview.src =
-        url;
+    liberarPreview();
 
 
-    previewContainer.hidden =
-        false;
+    mostrarPreview(
 
-}
+        campoImagem.value
+            .trim()
 
-
-function sincronizarImagemAtual() {
-
-    const url =
-        campoImagem.value.trim();
-
-
-    estado.urlAtual =
-        url;
+    );
 
 
     if (
 
-        !estado.arquivo
+        campoImagem.value
+            .trim()
 
     ) {
 
-        liberarPreviewLocal();
-
-
-        mostrarPreview(
-            url
+        setStatus(
+            "Fotografia atual do produto"
         );
-
-
-        if (url) {
-
-            mostrarStatus(
-                "Fotografia atual do produto"
-            );
-
-        }
 
     }
 
 }
 
 
-/* =====================================================
-   VALIDAR
-===================================================== */
-
-function validarArquivo(
+function validar(
     arquivo
 ) {
 
@@ -438,9 +381,7 @@ function validarArquivo(
     ) {
 
         throw new Error(
-
-            "Use uma imagem JPG, PNG ou WEBP."
-
+            "Use JPG, PNG ou WEBP."
         );
 
     }
@@ -449,14 +390,12 @@ function validarArquivo(
     if (
 
         arquivo.size >
-        CONFIG.tamanhoMaximo
+        CONFIG.max
 
     ) {
 
         throw new Error(
-
-            "A fotografia deve ter no máximo 5 MB."
-
+            "A imagem deve ter no máximo 5 MB."
         );
 
     }
@@ -464,50 +403,45 @@ function validarArquivo(
 }
 
 
-/* =====================================================
-   SELECIONAR
-===================================================== */
-
-function selecionarArquivo(
+function selecionar(
     arquivo
 ) {
 
     try {
 
-        validarArquivo(
+        validar(
             arquivo
         );
 
 
-        liberarPreviewLocal();
+        liberarPreview();
 
 
         estado.arquivo =
             arquivo;
 
 
-        estado.urlPreviewLocal =
-
+        estado.previewLocal =
             URL.createObjectURL(
                 arquivo
             );
 
 
         mostrarPreview(
-            estado.urlPreviewLocal
+            estado.previewLocal
         );
 
 
-        mostrarStatus(
-
+        setStatus(
             `${arquivo.name} selecionada`
-
         );
 
 
-    } catch (erro) {
+    } catch (
+        erro
+    ) {
 
-        mostrarStatus(
+        setStatus(
 
             erro.message,
 
@@ -520,13 +454,13 @@ function selecionarArquivo(
 }
 
 
-/* =====================================================
-   UPLOAD
-===================================================== */
+async function enviar() {
 
-async function enviarImagem() {
+    if (
 
-    if (!estado.arquivo) {
+        !estado.arquivo
+
+    ) {
 
         return campoImagem
             .value
@@ -538,15 +472,13 @@ async function enviarImagem() {
     if (!sb) {
 
         throw new Error(
-
             "Supabase não inicializado."
-
         );
 
     }
 
 
-    validarArquivo(
+    validar(
         estado.arquivo
     );
 
@@ -560,42 +492,30 @@ async function enviarImagem() {
     );
 
 
-    mostrarStatus(
+    setStatus(
         "Enviando fotografia..."
     );
 
 
     try {
 
-        const extensao =
-
-            TIPOS[
-                estado.arquivo.type
-            ];
-
-
         const caminho =
 
-            CONFIG.pasta +
-
-            "/" +
-
-            criarID() +
-
-            "." +
-
-            extensao;
+            `${CONFIG.pasta}/${criarID()}.${
+                TIPOS[
+                    estado.arquivo.type
+                ]
+            }`;
 
 
         const {
-
             data,
-
             error
-
         } = await sb.storage
 
-            .from(CONFIG.bucket)
+            .from(
+                CONFIG.bucket
+            )
 
             .upload(
 
@@ -626,29 +546,26 @@ async function enviarImagem() {
         }
 
 
-        const resultado =
+        const url =
 
             sb.storage
 
-            .from(CONFIG.bucket)
+            .from(
+                CONFIG.bucket
+            )
 
             .getPublicUrl(
                 data.path
-            );
+            )
 
-
-        const url =
-
-            resultado.data
-                ?.publicUrl;
+            .data
+            ?.publicUrl;
 
 
         if (!url) {
 
             throw new Error(
-
-                "Não foi possível obter a URL da fotografia."
-
+                "Não foi possível obter a URL."
             );
 
         }
@@ -658,15 +575,11 @@ async function enviarImagem() {
             url;
 
 
-        estado.urlAtual =
-            url;
-
-
         estado.arquivo =
             null;
 
 
-        liberarPreviewLocal();
+        liberarPreview();
 
 
         mostrarPreview(
@@ -674,7 +587,7 @@ async function enviarImagem() {
         );
 
 
-        mostrarStatus(
+        setStatus(
             "Fotografia enviada ao Supabase"
         );
 
@@ -682,10 +595,14 @@ async function enviarImagem() {
         campoImagem.dispatchEvent(
 
             new Event(
+
                 "change",
+
                 {
-                    bubbles: true
+                    bubbles:
+                        true
                 }
+
             )
 
         );
@@ -694,15 +611,16 @@ async function enviarImagem() {
         return url;
 
 
-    } catch (erro) {
+    } catch (
+        erro
+    ) {
 
         console.error(
-            "Erro no upload:",
             erro
         );
 
 
-        mostrarStatus(
+        setStatus(
 
             "Erro no envio: " +
             erro.message,
@@ -730,19 +648,40 @@ async function enviarImagem() {
 }
 
 
-/* =====================================================
-   CLIQUE
-===================================================== */
-
 zona.addEventListener(
 
     "click",
 
     () => {
 
-        if (!estado.enviando) {
+        if (
 
-            inputArquivo.click();
+            !estado.enviando
+
+        ) {
+
+            input.click();
+
+        }
+
+    }
+
+);
+
+
+trocar.addEventListener(
+
+    "click",
+
+    () => {
+
+        if (
+
+            !estado.enviando
+
+        ) {
+
+            input.click();
 
         }
 
@@ -760,36 +699,18 @@ zona.addEventListener(
         if (
 
             evento.key ===
-                "Enter"
+            "Enter"
 
             ||
 
             evento.key ===
-                " "
+            " "
 
         ) {
 
             evento.preventDefault();
 
-
-            inputArquivo.click();
-
-        }
-
-    }
-
-);
-
-
-trocar.addEventListener(
-
-    "click",
-
-    () => {
-
-        if (!estado.enviando) {
-
-            inputArquivo.click();
+            input.click();
 
         }
 
@@ -798,30 +719,26 @@ trocar.addEventListener(
 );
 
 
-/* =====================================================
-   FILE INPUT
-===================================================== */
-
-inputArquivo.addEventListener(
+input.addEventListener(
 
     "change",
 
     () => {
 
         const arquivo =
-            inputArquivo.files?.[0];
+            input.files?.[0];
 
 
         if (arquivo) {
 
-            selecionarArquivo(
+            selecionar(
                 arquivo
             );
 
         }
 
 
-        inputArquivo.value =
+        input.value =
             "";
 
     }
@@ -829,15 +746,12 @@ inputArquivo.addEventListener(
 );
 
 
-/* =====================================================
-   DRAG AND DROP
-===================================================== */
-
 [
     "dragenter",
     "dragover"
+]
 
-].forEach(
+.forEach(
 
     tipo => {
 
@@ -866,8 +780,9 @@ inputArquivo.addEventListener(
 [
     "dragleave",
     "drop"
+]
 
-].forEach(
+.forEach(
 
     tipo => {
 
@@ -900,14 +815,13 @@ zona.addEventListener(
     evento => {
 
         const arquivo =
-
             evento.dataTransfer
                 ?.files?.[0];
 
 
         if (arquivo) {
 
-            selecionarArquivo(
+            selecionar(
                 arquivo
             );
 
@@ -918,26 +832,19 @@ zona.addEventListener(
 );
 
 
-/* =====================================================
-   COLAR IMAGEM
-===================================================== */
-
 document.addEventListener(
 
     "paste",
 
     evento => {
 
-        const modal =
-            document.querySelector(
-                "#modal-produto"
-            );
-
-
         if (
 
-            !modal ||
-            !modal.open
+            !document
+                .querySelector(
+                    "#modal-produto"
+                )
+                ?.open
 
         ) {
 
@@ -946,20 +853,19 @@ document.addEventListener(
         }
 
 
-        const itens =
-
-            Array.from(
-                evento.clipboardData
-                    ?.items || []
-            );
-
-
         const itemImagem =
 
-            itens.find(
+            [
+                ...(
+                    evento.clipboardData
+                        ?.items ||
+                    []
+                )
+            ]
+
+            .find(
 
                 item =>
-
                     item.type
                         .startsWith(
                             "image/"
@@ -968,15 +874,9 @@ document.addEventListener(
             );
 
 
-        if (!itemImagem) {
-
-            return;
-
-        }
-
-
         const arquivo =
-            itemImagem.getAsFile();
+            itemImagem
+                ?.getAsFile();
 
 
         if (arquivo) {
@@ -984,7 +884,7 @@ document.addEventListener(
             evento.preventDefault();
 
 
-            selecionarArquivo(
+            selecionar(
                 arquivo
             );
 
@@ -995,77 +895,14 @@ document.addEventListener(
 );
 
 
-/* =====================================================
-   ALTERAÇÃO DO CAMPO IMAGEM
-===================================================== */
-
 campoImagem.addEventListener(
 
     "change",
 
-    sincronizarImagemAtual
+    sincronizar
 
 );
 
-
-/* =====================================================
-   QUANDO ABRIR O MODAL
-===================================================== */
-
-const modalProduto =
-    document.querySelector(
-        "#modal-produto"
-    );
-
-
-if (modalProduto) {
-
-    const observador =
-        new MutationObserver(
-
-            () => {
-
-                if (
-
-                    modalProduto.open
-
-                ) {
-
-                    estado.arquivo =
-                        null;
-
-
-                    sincronizarImagemAtual();
-
-                }
-
-            }
-
-        );
-
-
-    observador.observe(
-
-        modalProduto,
-
-        {
-
-            attributes:
-                true,
-
-            attributeFilter:
-                ["open"]
-
-        }
-
-    );
-
-}
-
-
-/* =====================================================
-   INTERCEPTAR SALVAMENTO
-===================================================== */
 
 formulario.addEventListener(
 
@@ -1099,20 +936,12 @@ formulario.addEventListener(
         }
 
 
-        /*
-        Existe uma imagem nova.
-
-        Impedimos temporariamente o admin de salvar,
-        enviamos a imagem e depois submetemos novamente.
-        */
-
         evento.preventDefault();
 
         evento.stopImmediatePropagation();
 
 
         const botao =
-
             formulario.querySelector(
                 '[type="submit"]'
             );
@@ -1128,21 +957,10 @@ formulario.addEventListener(
 
         try {
 
-            await enviarImagem();
+            await enviar();
 
-
-            /*
-            Na segunda submissão:
-            estado.arquivo = null,
-            então este interceptador libera o admin.js.
-            */
 
             formulario.requestSubmit();
-
-
-        } catch (erro) {
-
-            console.error(erro);
 
 
         } finally {
@@ -1163,53 +981,42 @@ formulario.addEventListener(
 );
 
 
-/* =====================================================
-   API
-===================================================== */
-
 window.CRIAITOR_FOTOS = {
 
     temArquivoPendente:
-
         () =>
             Boolean(
                 estado.arquivo
             ),
 
     enviando:
-
         () =>
             estado.enviando,
 
     obterImagem:
-
         () =>
             campoImagem.value,
 
-    enviar:
-        enviarImagem,
+    enviar,
 
     atualizarPreview:
-        sincronizarImagemAtual,
+        sincronizar,
 
     limpar:
-
         () => {
 
             estado.arquivo =
                 null;
 
+            liberarPreview();
 
-            liberarPreviewLocal();
-
-
-            sincronizarImagemAtual();
+            sincronizar();
 
         }
 
 };
 
 
-sincronizarImagemAtual();
+sincronizar();
 
 })();
